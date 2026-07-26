@@ -1,7 +1,11 @@
 package poncha.kiet.vehicleservice.service.Impl;
 
 import lombok.RequiredArgsConstructor;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
+import poncha.kiet.userservice.grpc.UserRequest;
+import poncha.kiet.userservice.grpc.UserResponse;
+import poncha.kiet.userservice.grpc.UserToVehicleServiceGrpc;
 import poncha.kiet.vehicleservice.exception.ResourceNotFoundException;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
@@ -15,6 +19,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class VehicleServiceImpl implements VehicleService {
+    @GrpcClient("userServiceGrpc")
+    private UserToVehicleServiceGrpc.UserToVehicleServiceBlockingStub userServiceBlockingStub;
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
 
@@ -28,6 +34,9 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void createVehicle(VehicleRequestDTO vehicleRequestDTO) {
+        UserResponse userResponse = userServiceBlockingStub.getUserById(UserRequest.newBuilder()
+                .setId(vehicleRequestDTO.getUserId())
+                .build());
         Vehicle vehicle = vehicleMapper.toEntity(vehicleRequestDTO);
         vehicle.setId(UUID.randomUUID().toString());
         vehicleRepository.save(vehicle);

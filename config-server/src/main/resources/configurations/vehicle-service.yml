@@ -12,3 +12,9 @@ spring:
   data:
     mongodb:
       uri: mongodb://admin:123456@localhost:27017/koto_vehicle?authSource=admin
+
+grpc:
+  client:
+    userServiceGrpc:
+      address: "static://localhost:9091"
+      negotiationType: PLAINTEXT

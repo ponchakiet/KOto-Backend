@@ -1,0 +1,17 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "poncha.kiet.userservice.grpc";
+option java_outer_classname = "UserToVehicleProto";
+
+
+service UserToVehicleService {
+  rpc getUserById(UserRequest) returns (UserResponse);
+}
+
+message UserRequest {
+  string id = 1;
+}
+
+message UserResponse {
+  string id = 1;
+}
