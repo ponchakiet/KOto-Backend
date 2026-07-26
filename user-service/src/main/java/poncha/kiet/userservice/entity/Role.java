@@ -18,7 +18,7 @@ public class Role {
     @Column(name = "role_id")
     private String id;
 
-    @Column(name = "name")
+    @Column(name = "name",  nullable = false, unique = true)
     private String name;
 
     @ManyToMany

@@ -15,10 +15,10 @@ public class SubscriptionPlan {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "monthly_price")
+    @Column(name = "monthly_price", nullable = false)
     private double monthlyPrice;
-    @Column(name = "max_post")
+    @Column(name = "max_post", nullable = false)
     private int maxPost;
-    @Column(name = "show_post")
+    @Column(name = "show_post", nullable = false)
     private int showPost;
 }

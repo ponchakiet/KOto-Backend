@@ -1,0 +1,14 @@
+server:
+  port: 8082
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 50MB
+    context-path: /vehicle-service
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:123456@localhost:27017/
+      database: koto_vehicle
