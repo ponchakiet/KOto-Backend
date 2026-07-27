@@ -14,6 +14,7 @@ import poncha.kiet.userservice.dto.response.UserResponseDTO;
 import poncha.kiet.userservice.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -70,14 +71,14 @@ public class UserController {
     }
 
     @PostMapping(value = "/{userId}/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response<Void>> updateAvatar(
+    public ResponseEntity<Response<Map<String, String>>> updateAvatar(
             @PathVariable("userId") String id,
             @RequestParam MultipartFile file
     ) {
-        userService.updateAvatar(id, file);
-        return ResponseEntity.ok(Response.<Void>builder()
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Update avatar successfully")
+                .data(userService.updateAvatar(id, file))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

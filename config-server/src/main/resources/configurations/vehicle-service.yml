@@ -11,8 +11,8 @@ spring:
       max-request-size: 50MB
   data:
     mongodb:
-      uri: mongodb://admin:123456@localhost:27017/koto_vehicle?authSource=admin
-
+      uri: mongodb://${DB_ASSET_SERVICE_USERNAME}:${DB_ASSET_SERVICE_PASSWORD}@${DB_ASSET_SERVICE_HOST}:${DB_ASSET_SERVICE_PORT}
+      database: ${DB_ASSET_SERVICE_NAME}
 grpc:
   client:
     userServiceGrpc:

@@ -1,7 +1,10 @@
 package poncha.kiet.userservice.service.impl;
 
+import com.google.protobuf.ByteString;
+import io.grpc.stub.StreamObserver;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,17 +15,28 @@ import poncha.kiet.userservice.dto.response.UserResponseDTO;
 import poncha.kiet.userservice.entity.User;
 import poncha.kiet.userservice.exception.DuplicateResourceException;
 import poncha.kiet.userservice.exception.ResourceNotFoundException;
+import poncha.kiet.userservice.grpc.FileChunk;
+import poncha.kiet.userservice.grpc.UploadResponse;
+import poncha.kiet.userservice.grpc.UploadServiceGrpc;
 import poncha.kiet.userservice.mapper.UserMapper;
 import poncha.kiet.userservice.repository.UserRepository;
 import poncha.kiet.userservice.service.UserService;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+
+    @GrpcClient("uploadServiceGrpc")
+    private UploadServiceGrpc.UploadServiceStub uploadServiceStub;
 
     @Override
     public Page<UserResponseDTO> findAll(Pageable pageable) {
@@ -71,11 +85,60 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateAvatar(String id, MultipartFile file) {
+    public Map<String, String> updateAvatar(String id, MultipartFile file) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + id));
 
-        userRepository.save(user);
+        final UploadResponse[] responses = new UploadResponse[1];
+        CountDownLatch finishLatch = new CountDownLatch(1);
+        StreamObserver<UploadResponse> uploadResponseStreamObserver = new StreamObserver<UploadResponse>() {
+            @Override
+            public void onNext(UploadResponse uploadResponse) {
+                responses[0] = uploadResponse;
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                finishLatch.countDown();
+                throw new RuntimeException(throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                finishLatch.countDown();
+            }
+        };
+
+        StreamObserver<FileChunk> requestObserver = uploadServiceStub.upload(uploadResponseStreamObserver);
+
+        try (InputStream inputStream = file.getInputStream()) {
+            byte[] buffer = new byte[1024 * 1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                FileChunk chunk = FileChunk.newBuilder()
+                        .setContent(ByteString.copyFrom(buffer, 0, bytesRead))
+                        .setFileName(file.getOriginalFilename())
+                        .build();
+                requestObserver.onNext(chunk);
+            }
+            requestObserver.onCompleted();
+            if (!finishLatch.await(10, TimeUnit.SECONDS)) {
+                {
+                    throw new RuntimeException("Upload timed out");
+                }
+            }
+            if (responses[0] == null) {
+                throw new RuntimeException("No response received from upload service");
+            }
+            user.setAvtUrl(responses[0].getUrl());
+            userRepository.save(user);
+
+            return Map.of("avtUrl", user.getAvtUrl());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -119,7 +182,7 @@ public class UserServiceImpl implements UserService {
         User follower = userRepository.findById(followerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + followerId));
 
-        if(userId.equals(followerId)) {
+        if (userId.equals(followerId)) {
             throw new IllegalArgumentException("You can not follow yourself");
         }
 
