@@ -1,6 +1,7 @@
 package poncha.kiet.vehicleservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import poncha.kiet.vehicleservice.dto.response.Response;
@@ -9,6 +10,7 @@ import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/vehicles")
@@ -26,10 +28,22 @@ public class VehicleController {
                 .build());
     }
 
+    @PutMapping("/link-project")
+    public ResponseEntity<Response<Void>> linkProject(@RequestBody Map<String, String> request) {
+        String vehicleId = request.get("vehicleId");
+        String projectId = request.get("projectId");
+        vehicleService.linkVehicleToProject(vehicleId, projectId);
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Link vehicle to project successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
     @PostMapping
     public ResponseEntity<Response<Void>> createVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) {
         vehicleService.createVehicle(vehicleRequestDTO);
-        return ResponseEntity.ok(Response.<Void>builder()
+        return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
                 .success(true)
                 .message("Create vehicle successfully")
                 .timestamp(LocalDateTime.now())

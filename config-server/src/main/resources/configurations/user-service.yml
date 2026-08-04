@@ -10,9 +10,9 @@ spring:
       max-file-size: 100MB
       max-request-size: 50MB
   datasource:
-    url: ${DB_USER_SERVICE_URL}
-    username: ${DB_USER_SERVICE_USERNAME}
-    password: ${DB_USER_SERVICE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/koto_userdb
+    username: postgres
+    password: Ngocmai@1004
   jpa:
     hibernate:
       ddl-auto: update

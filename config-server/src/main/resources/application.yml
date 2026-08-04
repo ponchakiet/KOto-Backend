@@ -1,9 +1,4 @@
-dotenv:
-  enabled: true
-
 spring:
-    config:
-      import: optional:file:.env[.properties]
     profiles:
       active: native
     application:

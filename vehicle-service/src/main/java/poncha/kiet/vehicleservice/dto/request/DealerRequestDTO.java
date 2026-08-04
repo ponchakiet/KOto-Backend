@@ -1,0 +1,16 @@
+package poncha.kiet.vehicleservice.dto.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class DealerRequestDTO {
+    private LocalDateTime foundingDate;
+    private String name;
+    private String description;
+}

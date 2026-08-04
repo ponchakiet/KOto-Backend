@@ -6,4 +6,5 @@ import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
 public interface VehicleService {
     VehicleResponseDTO findVehicleById(String id);
     void createVehicle(VehicleRequestDTO vehicleRequestDTO);
+    void linkVehicleToProject(String vehicleId, String projectId);
 }

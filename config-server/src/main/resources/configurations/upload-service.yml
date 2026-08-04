@@ -1,9 +1,9 @@
 aws:
-  accessKey: ${AWS_ACCESS_KEY}
-  secretKey: ${AWS_SECRET_KEY}
-  region: ${AWS_REGION}
+  accessKey: AKIASK5QXV6VUT6Q2ST7
+  secretKey: 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
+  region: ap-southeast-1
   s3:
-    bucketName: ${S3_BUCKETNAME}
+    bucketName: koto-storage
 grpc:
   server:
     port: 9092

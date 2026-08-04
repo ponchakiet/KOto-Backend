@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Document(collection = "project")
 @Data
@@ -20,5 +21,6 @@ public class Project {
     private LocalDateTime endDate;
     private LocalDateTime openSale;
     private String description;
-    private String brandId;
+    private String dealerId;
+    private Set<String> vehicleIds;
 }

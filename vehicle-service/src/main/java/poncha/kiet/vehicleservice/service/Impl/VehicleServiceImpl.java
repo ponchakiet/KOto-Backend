@@ -11,6 +11,7 @@ import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
 import poncha.kiet.vehicleservice.entity.Vehicle;
 import poncha.kiet.vehicleservice.mapper.VehicleMapper;
+import poncha.kiet.vehicleservice.repository.ProjectRepository;
 import poncha.kiet.vehicleservice.repository.VehicleRepository;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
@@ -23,6 +24,7 @@ public class VehicleServiceImpl implements VehicleService {
     private UserToVehicleServiceGrpc.UserToVehicleServiceBlockingStub userServiceBlockingStub;
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
+    private final ProjectRepository projectRepository;
 
     @Override
     public VehicleResponseDTO findVehicleById(String id) {
@@ -39,6 +41,18 @@ public class VehicleServiceImpl implements VehicleService {
                 .build());
         Vehicle vehicle = vehicleMapper.toEntity(vehicleRequestDTO);
         vehicle.setId(UUID.randomUUID().toString());
+        vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public void linkVehicleToProject(String vehicleId, String projectId) {
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not Found Project: " + projectId));
+
+        Vehicle vehicle =  vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not Found Vehicle: " + vehicleId));
+
+        vehicle.setProjectId(projectId);
         vehicleRepository.save(vehicle);
     }
 }
