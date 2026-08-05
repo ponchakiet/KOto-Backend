@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import poncha.kiet.userservice.grpc.UserRequest;
 import poncha.kiet.userservice.grpc.UserResponse;
 import poncha.kiet.userservice.grpc.UserToVehicleServiceGrpc;
+import poncha.kiet.vehicleservice.entity.Content;
 import poncha.kiet.vehicleservice.exception.ResourceNotFoundException;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
@@ -40,6 +41,7 @@ public class VehicleServiceImpl implements VehicleService {
                 .setId(vehicleRequestDTO.getUserId())
                 .build());
         Vehicle vehicle = vehicleMapper.toEntity(vehicleRequestDTO);
+        vehicle.getContents().forEach(Content::generateId);
         vehicle.setId(UUID.randomUUID().toString());
         vehicleRepository.save(vehicle);
     }

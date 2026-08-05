@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
+import poncha.kiet.postservice.dto.response.PostResponseDTO;
 import poncha.kiet.postservice.entity.Post;
 
 @Mapper(componentModel = "spring",
@@ -11,4 +12,5 @@ import poncha.kiet.postservice.entity.Post;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PostMapper {
     Post toEntity(PostRequestDTO request);
+    PostResponseDTO toDto(Post post);
 }

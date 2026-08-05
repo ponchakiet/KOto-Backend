@@ -57,6 +57,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Response<?>> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
+        Response<?> errorResponse = Response.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .errors(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<Response<?>> handleDuplicateResourceException(DuplicateResourceException ex, HttpServletRequest request) {
         Response<?> errorResponse = Response.builder()

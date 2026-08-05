@@ -54,12 +54,6 @@ public class VehicleGrpcServiceImpl extends VehicleToPostServiceGrpc.VehicleToPo
                             .asRuntimeException());
         }
         Vehicle vehicle = optionalVehicle.get();
-        if (!vehicle.getUserId().equals(request.getUserId())) {
-            responseObserver.onError(
-                    Status.PERMISSION_DENIED
-                            .withDescription("Don't have permission for this source")
-                            .asRuntimeException());
-        }
 
         List<Content> contentList = vehicle.getContents().stream()
                 .map(c -> {
