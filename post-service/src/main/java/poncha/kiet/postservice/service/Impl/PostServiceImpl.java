@@ -10,6 +10,7 @@ import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
 import poncha.kiet.postservice.dto.response.VehicleDetailResponseDTO;
 import poncha.kiet.postservice.entity.Post;
+import poncha.kiet.postservice.entity.PostLike;
 import poncha.kiet.postservice.entity.PostStatus;
 import poncha.kiet.postservice.exception.ResourceNotFoundException;
 import poncha.kiet.postservice.exception.UnauthorizedException;
@@ -29,7 +30,6 @@ import java.util.Map;
 public class PostServiceImpl implements PostService {
     @GrpcClient("vehicleService")
     private VehicleToPostServiceGrpc.VehicleToPostServiceBlockingStub vehicleServiceBlockingStub;
-    @GrpcClient("postService")
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final VehicleMapper vehicleMapper;
@@ -93,12 +93,37 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
+    public void likePost(String userId, String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " + postId));
+
+        PostLike postLike = PostLike.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+
+        post.addLikePost(postLike);
+        postRepository.save(post);
+    }
+
+    @Override
+    @Transactional
+    public void unlikePost(String userId, String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " + postId));
+
+        post.removeLikePost(userId);
+        postRepository.save(post);
+    }
+
+    @Override
     public PostResponseDTO findPostById(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " + postId));
 
         VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(VehicleRequest.newBuilder()
-                .setId(post.getId())
+                .setId(post.getVehicleId())
                 .build());
 
         PostResponseDTO postResponseDTO = postMapper.toDto(post);

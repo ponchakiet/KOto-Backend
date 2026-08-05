@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,7 +41,27 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> userLike;
 
+    public void addLikePost(PostLike postLike) {
+        if(userLike == null)
+            userLike = new ArrayList<>();
+
+        postLike.setPost(this);
+        userLike.add(postLike);
+    }
+
+    public void removeLikePost(String userId) {
+        if (userLike == null)
+            userLike = new ArrayList<>();
+
+        PostLike postLike = userLike.stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Something went wrong"));
+
+        userLike.remove(postLike);
+        postLike.setPost(null);
+    }
 }

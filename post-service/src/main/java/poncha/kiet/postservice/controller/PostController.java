@@ -36,4 +36,28 @@ public class PostController {
                 .timestamp(LocalDateTime.now())
                 .build());
     }
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Response<Void>> likePost(
+            @PathVariable("postId") String postId,
+            @RequestParam("userId") String userId) {
+        postService.likePost(userId, postId);
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Like post successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PostMapping("/{postId}/unlike")
+    public ResponseEntity<Response<Void>> unlikePost(
+            @PathVariable("postId") String postId,
+            @RequestParam("userId") String userId) {
+        postService.unlikePost(userId, postId);
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Unlike post successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
 }

@@ -23,5 +23,5 @@ spring:
   grpc:
     client:
       vehicleService:
-        address: "static://localhost:9093"
+        address: "discovery://vehicle-service"
         negotiationType: PLAINTEXT

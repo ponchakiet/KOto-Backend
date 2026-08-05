@@ -16,6 +16,10 @@ public interface PostService {
 
     void acceptPost(String userId, String postId);
 
+    void likePost(String userId, String postId);
+
+    void unlikePost(String userId, String postId);
+
     PostResponseDTO findPostById(String postId);
 
     Page<PostResponseDTO> findAll(Pageable pageable);

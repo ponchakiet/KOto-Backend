@@ -9,6 +9,9 @@ spring:
       enabled: true
       max-file-size: 100MB
       max-request-size: 50MB
+  cloud:
+    discovery:
+      enabled: true
   data:
     mongodb:
       authentication-database: admin
