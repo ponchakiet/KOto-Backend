@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.CommentResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
-import poncha.kiet.postservice.dto.response.VehicleDetailResponseDTO;
 import poncha.kiet.postservice.entity.Comment;
 import poncha.kiet.postservice.entity.Post;
 import poncha.kiet.postservice.entity.PostLike;

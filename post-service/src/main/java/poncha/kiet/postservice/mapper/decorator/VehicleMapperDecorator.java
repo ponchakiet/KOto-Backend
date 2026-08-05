@@ -1,16 +1,15 @@
 package poncha.kiet.postservice.mapper.decorator;
 
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import poncha.kiet.postservice.dto.response.VehicleDetailResponseDTO;
 import poncha.kiet.postservice.grpc.VehicleResponse;
 import poncha.kiet.postservice.mapper.VehicleMapper;
 
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class VehicleMapperDecorator implements VehicleMapper {
+    @Autowired
     private VehicleMapper vehicleMapper;
-
 
     @Override
     public VehicleDetailResponseDTO toDto(VehicleResponse vehicle) {

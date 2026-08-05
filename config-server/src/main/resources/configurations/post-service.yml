@@ -20,8 +20,11 @@ spring:
       hibernate:
         format_sql: true
 
-  grpc:
-    client:
-      vehicleService:
-        address: "discovery://vehicle-service"
-        negotiationType: PLAINTEXT
+grpc:
+  client:
+    vehicleService:
+      address: "discovery:///vehicle-service"
+      negotiationType: PLAINTEXT
+  server:
+    port: 9094
+    enable-reflection: true
