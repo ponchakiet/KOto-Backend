@@ -1,0 +1,41 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "poncha.kiet.vehicleservice.grpc";
+option java_outer_classname = "VehicleToPostProto";
+
+
+service VehicleToPostService {
+  rpc checkExisted(VehicleRequest) returns (CheckExistedResponse);
+  rpc getVehicleDetail(VehicleRequest) returns (VehicleResponse);
+}
+
+message VehicleRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message CheckExistedResponse {
+  string id = 1;
+  bool isExisted = 2;
+}
+
+message VehicleResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string province = 4;
+  string ward = 5;
+  string address = 6;
+  double price = 7;
+  int32 manufactureYear = 8;
+  map<string, string> properties = 9;
+  repeated Content contentList = 10;
+}
+
+message Content {
+  string id = 1;
+  string url = 2;
+  string name = 3;
+  double duration = 4;
+  string type = 5;
+}

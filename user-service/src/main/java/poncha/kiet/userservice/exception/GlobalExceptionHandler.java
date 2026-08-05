@@ -1,5 +1,7 @@
 package poncha.kiet.userservice.exception;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,36 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(StatusRuntimeException.class)
+    public ResponseEntity<Response> handleStatusRuntimeException(StatusRuntimeException ex, HttpServletRequest req) {
+        Status.Code code = ex.getStatus().getCode();
+        String message = ex.getStatus().getDescription();
+        HttpStatus httpStatus;
+
+        switch (code) {
+            case NOT_FOUND:
+                httpStatus = HttpStatus.NOT_FOUND;
+                break;
+            case UNAVAILABLE:
+                httpStatus = HttpStatus.SERVICE_UNAVAILABLE;
+                break;
+            case DEADLINE_EXCEEDED:
+                httpStatus = HttpStatus.GATEWAY_TIMEOUT;
+                break;
+            case INVALID_ARGUMENT:
+                httpStatus = HttpStatus.BAD_REQUEST;
+                break;
+            default:
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        Response<?> errorResponse = Response.builder()
+                .success(false)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .errors(httpStatus.value())
+                .build();
+        return new ResponseEntity<>(errorResponse, httpStatus);
+    }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Response<?>> handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
         Response<?> errorResponse = Response.builder()
