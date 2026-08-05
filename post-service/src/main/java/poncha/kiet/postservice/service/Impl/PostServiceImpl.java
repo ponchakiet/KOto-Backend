@@ -2,6 +2,8 @@ package poncha.kiet.postservice.service.Impl;
 
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
@@ -15,9 +17,11 @@ import poncha.kiet.postservice.grpc.VehicleRequest;
 import poncha.kiet.postservice.grpc.VehicleResponse;
 import poncha.kiet.postservice.grpc.VehicleToPostServiceGrpc;
 import poncha.kiet.postservice.mapper.PostMapper;
+import poncha.kiet.postservice.mapper.VehicleMapper;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -28,6 +32,7 @@ public class PostServiceImpl implements PostService {
     @GrpcClient("postService")
     private final PostMapper postMapper;
     private final PostRepository postRepository;
+    private final VehicleMapper vehicleMapper;
 
     @Override
     @Transactional
@@ -97,27 +102,24 @@ public class PostServiceImpl implements PostService {
                 .build());
 
         PostResponseDTO postResponseDTO = postMapper.toDto(post);
-        postResponseDTO.setVehicleDetail(
-                VehicleDetailResponseDTO.builder()
-                        .id(vehicleResponse.getId())
-                        .manufactureYear(vehicleResponse.getManufactureYear())
-                        .price(vehicleResponse.getPrice())
-                        .name(vehicleResponse.getName())
-                        .address(vehicleResponse.getAddress())
-                        .ward(vehicleResponse.getWard())
-                        .province(vehicleResponse.getProvince())
-                        .properties(vehicleResponse.getPropertiesMap())
-                        .contents(
-                                vehicleResponse.getContentListList().stream()
-                                        .map(c -> VehicleDetailResponseDTO.Content.builder()
-                                                .url(c.getUrl())
-                                                .id(c.getId())
-                                                .name(c.getName())
-                                                .duration(c.getDuration())
-                                                .type(c.getType())
-                                                .build()).toList()
-                        )
-                        .build());
+        postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
         return postResponseDTO;
+    }
+
+    @Override
+    public Page<PostResponseDTO> findAll(Pageable pageable) {
+        Page<Post> postPage = postRepository.findAll(pageable);
+
+        Page<PostResponseDTO> posts = postPage
+                .map(p -> {
+                    VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(VehicleRequest.newBuilder()
+                            .setId(p.getVehicleId())
+                            .build());
+                    PostResponseDTO postResponseDTO = postMapper.toDto(p);
+                    postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
+                    return postResponseDTO;
+                });
+
+        return posts;
     }
 }
