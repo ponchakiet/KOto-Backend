@@ -3,6 +3,7 @@ package poncha.kiet.postservice.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
+import poncha.kiet.postservice.dto.response.CommentResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
 
 import java.util.Map;
@@ -23,4 +24,10 @@ public interface PostService {
     PostResponseDTO findPostById(String postId);
 
     Page<PostResponseDTO> findAll(Pageable pageable);
+
+    Map<String, String> createComment(String postId, Map<String, String> content);
+
+    void deleteComment(String postId, Map<String, String> content);
+
+    Page<CommentResponseDTO> findCommentsByPostId(String postId, Pageable pageable);
 }

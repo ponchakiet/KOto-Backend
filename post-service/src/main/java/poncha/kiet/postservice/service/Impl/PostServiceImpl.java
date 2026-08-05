@@ -7,8 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
+import poncha.kiet.postservice.dto.response.CommentResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
 import poncha.kiet.postservice.dto.response.VehicleDetailResponseDTO;
+import poncha.kiet.postservice.entity.Comment;
 import poncha.kiet.postservice.entity.Post;
 import poncha.kiet.postservice.entity.PostLike;
 import poncha.kiet.postservice.entity.PostStatus;
@@ -17,11 +19,14 @@ import poncha.kiet.postservice.exception.UnauthorizedException;
 import poncha.kiet.postservice.grpc.VehicleRequest;
 import poncha.kiet.postservice.grpc.VehicleResponse;
 import poncha.kiet.postservice.grpc.VehicleToPostServiceGrpc;
+import poncha.kiet.postservice.mapper.CommentMapper;
 import poncha.kiet.postservice.mapper.PostMapper;
 import poncha.kiet.postservice.mapper.VehicleMapper;
+import poncha.kiet.postservice.repository.CommentRepository;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +38,8 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final VehicleMapper vehicleMapper;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     @Override
     @Transactional
@@ -146,5 +153,49 @@ public class PostServiceImpl implements PostService {
                 });
 
         return posts;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, String> createComment(String postId, Map<String, String> content) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
+
+        Comment comment = Comment.builder()
+                .userId(content.get("userId"))
+                .createdAt(LocalDateTime.now())
+                .content(content.get("content"))
+                .build();
+
+        post.addComment(comment);
+        postRepository.save(post);
+
+        comment = commentRepository.save(comment);
+
+        return Map.of("id", comment.getId());
+
+    }
+
+    @Override
+    public void deleteComment(String postId, Map<String, String> content) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
+
+        Comment comment = post.getComments().stream()
+                .filter(c -> c.getId().equals(content.get("commentId")))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Not found comment"));
+
+        if(!comment.getUserId().equals(content.get("userId")))
+            throw new UnauthorizedException("Don't have permission for this resource");
+
+        post.removeComment(comment);
+        postRepository.save(post);
+    }
+
+    @Override
+    public Page<CommentResponseDTO> findCommentsByPostId(String postId, Pageable pageable) {
+        Page<Comment> comments = commentRepository.findAllByPostId(postId, pageable);
+        return comments.map(commentMapper::toDto);
     }
 }

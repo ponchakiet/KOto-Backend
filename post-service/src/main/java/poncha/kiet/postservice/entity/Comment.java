@@ -2,8 +2,10 @@ package poncha.kiet.postservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Builder
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -19,6 +22,7 @@ public class Comment {
 
     private String userId;
     private String content;
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @ManyToOne
