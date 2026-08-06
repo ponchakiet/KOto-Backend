@@ -2,6 +2,7 @@ package poncha.kiet.postservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,20 @@ public class PostController {
                 .success(true)
                 .message("Get post successfully")
                 .data(postService.findPostById(postId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping
+    public ResponseEntity<Response<PageResponse<PostResponseDTO>>> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String type
+    ) {
+        return ResponseEntity.ok(Response.<PageResponse<PostResponseDTO>>builder()
+                .success(true)
+                .message("Get posts successfully")
+                .data(PageResponse.build(postService.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")), type)))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

@@ -23,7 +23,7 @@ public interface PostService {
 
     PostResponseDTO findPostById(String postId);
 
-    Page<PostResponseDTO> findAll(Pageable pageable);
+    Page<PostResponseDTO> findAll(Pageable pageable, String type);
 
     Map<String, String> createComment(String postId, Map<String, String> content);
 

@@ -9,10 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.CommentResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
-import poncha.kiet.postservice.entity.Comment;
-import poncha.kiet.postservice.entity.Post;
-import poncha.kiet.postservice.entity.PostLike;
-import poncha.kiet.postservice.entity.PostStatus;
+import poncha.kiet.postservice.entity.*;
 import poncha.kiet.postservice.exception.ResourceNotFoundException;
 import poncha.kiet.postservice.exception.UnauthorizedException;
 import poncha.kiet.postservice.grpc.VehicleRequest;
@@ -138,8 +135,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostResponseDTO> findAll(Pageable pageable) {
-        Page<Post> postPage = postRepository.findAll(pageable);
+    public Page<PostResponseDTO> findAll(Pageable pageable, String type) {
+        Page<Post> postPage = postRepository.findAllByType(pageable, PostType.valueOf(type));
 
         Page<PostResponseDTO> posts = postPage
                 .map(p -> {

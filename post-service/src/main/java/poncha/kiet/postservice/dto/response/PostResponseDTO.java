@@ -15,6 +15,8 @@ public class PostResponseDTO {
     private String id;
     private String title;
     private String description;
+    private String type;
+    private LocalDateTime createdAt;
     private LocalDateTime lastUpdated;
     private String userId;
     private String status;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +25,10 @@ public class Post {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "created_at")
+    @CreatedDate
+    private LocalDateTime createdAt;
+
     @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
 
@@ -32,6 +37,9 @@ public class Post {
 
     @Column(name = "user_id")
     private String userId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private PostType type;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
