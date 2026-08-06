@@ -8,3 +8,7 @@ grpc:
   server:
     port: 9092
     enable-reflection: true
+
+spring:
+  main:
+    web-application-type: none
