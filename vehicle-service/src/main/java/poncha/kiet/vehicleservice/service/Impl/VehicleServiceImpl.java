@@ -1,28 +1,43 @@
 package poncha.kiet.vehicleservice.service.Impl;
 
+import com.google.protobuf.ByteString;
+import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
-import poncha.kiet.userservice.grpc.UserRequest;
-import poncha.kiet.userservice.grpc.UserResponse;
-import poncha.kiet.userservice.grpc.UserToVehicleServiceGrpc;
-import poncha.kiet.vehicleservice.entity.Content;
+import org.springframework.web.multipart.MultipartFile;
+import poncha.kiet.vehicle.grpc.FileChunk;
+import poncha.kiet.vehicle.grpc.UploadResponse;
+import poncha.kiet.vehicle.grpc.UploadServiceGrpc;
+import poncha.kiet.vehicleservice.dto.request.UploadImageRequestDTO;
+import poncha.kiet.vehicleservice.entity.*;
 import poncha.kiet.vehicleservice.exception.ResourceNotFoundException;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
-import poncha.kiet.vehicleservice.entity.Vehicle;
+import poncha.kiet.vehicleservice.grpc.UserRequest;
+import poncha.kiet.vehicleservice.grpc.UserResponse;
+import poncha.kiet.vehicleservice.grpc.UserToVehicleServiceGrpc;
 import poncha.kiet.vehicleservice.mapper.VehicleMapper;
 import poncha.kiet.vehicleservice.repository.ProjectRepository;
 import poncha.kiet.vehicleservice.repository.VehicleRepository;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class VehicleServiceImpl implements VehicleService {
     @GrpcClient("userServiceGrpc")
-    private UserToVehicleServiceGrpc.UserToVehicleServiceBlockingStub userServiceBlockingStub;
+    private UserToVehicleServiceGrpc.UserToVehicleServiceBlockingStub serviceBlockingStub;
+    @GrpcClient("uploadServiceGrpc")
+    private UploadServiceGrpc.UploadServiceStub uploadServiceStub;
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
     private final ProjectRepository projectRepository;
@@ -37,7 +52,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void createVehicle(VehicleRequestDTO vehicleRequestDTO) {
-        UserResponse userResponse = userServiceBlockingStub.getUserById(UserRequest.newBuilder()
+        UserResponse userResponse = serviceBlockingStub.getUserById(UserRequest.newBuilder()
                 .setId(vehicleRequestDTO.getUserId())
                 .build());
         Vehicle vehicle = vehicleMapper.toEntity(vehicleRequestDTO);
@@ -55,6 +70,95 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Not Found Vehicle: " + vehicleId));
 
         vehicle.setProjectId(projectId);
+        vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public Map<String, String> uploadImage(UploadImageRequestDTO request) {
+        Vehicle vehicle;
+        if(request.getVehicleId()==null){
+            vehicle = Vehicle.builder()
+                    .id(UUID.randomUUID().toString())
+                    .build();
+        } else
+            vehicle = vehicleRepository.findById(request.getVehicleId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Not found vehicle"));
+
+        MultipartFile file = request.getFile();
+        CountDownLatch finishLatch = new CountDownLatch(1);
+        Map<String, String> response = new HashMap<>();
+        StreamObserver<UploadResponse> uploadResponseStreamObserver = new StreamObserver<UploadResponse>() {
+            @Override
+            public void onNext(UploadResponse uploadResponse) {
+                if(uploadResponse.getType().equals(ContentType.IMAGE)) {
+                    Image image = Image.builder()
+                            .id(UUID.randomUUID().toString())
+                            .url(uploadResponse.getUrl())
+                            .name(file.getOriginalFilename())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    vehicle.addContent(image);
+                } else {
+                    Video video = Video.builder()
+                            .id(UUID.randomUUID().toString())
+                            .url(uploadResponse.getUrl())
+                            .name(file.getOriginalFilename())
+                            .duration(uploadResponse.getDuration())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    vehicle.addContent(video);
+                }
+                response.put("vehicleId", vehicle.getId());
+                response.put("url", uploadResponse.getUrl());
+
+                vehicleRepository.save(vehicle);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                finishLatch.countDown();
+                throw new RuntimeException(throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                finishLatch.countDown();
+            }
+        };
+        StreamObserver<FileChunk> requestObserver = uploadServiceStub.upload(uploadResponseStreamObserver);
+
+        try (InputStream inputStream = file.getInputStream()) {
+            byte[] buffer = new byte[1024 * 1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                FileChunk chunk = FileChunk.newBuilder()
+                        .setContent(ByteString.copyFrom(buffer, 0, bytesRead))
+                        .setFileName(file.getOriginalFilename())
+                        .build();
+                requestObserver.onNext(chunk);
+            }
+            requestObserver.onCompleted();
+            if(!finishLatch.await(10, TimeUnit.SECONDS))
+                throw new RuntimeException("Upload Failed");
+
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateVehicle(VehicleRequestDTO request) {
+        UserResponse userResponse = serviceBlockingStub.getUserById(UserRequest.newBuilder()
+                .setId(request.getUserId())
+                .build());
+
+        Vehicle vehicle = vehicleRepository.findById(request.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Not foung vehicle"));
+
+        vehicleMapper.update(request, vehicle);
         vehicleRepository.save(vehicle);
     }
 }

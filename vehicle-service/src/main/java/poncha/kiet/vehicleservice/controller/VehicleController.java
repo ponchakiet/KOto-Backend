@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import poncha.kiet.vehicleservice.dto.request.UploadImageRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.Response;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
@@ -46,6 +48,22 @@ public class VehicleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
                 .success(true)
                 .message("Create vehicle successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PutMapping("/upload")
+    public ResponseEntity<Response<Map<String, String>>> uploadVehicleImage(
+            @RequestParam(value = "vehicleId", required = false) String id,
+            @RequestParam(value = "file") MultipartFile file
+    ) {
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
+                .success(true)
+                .message("Upload vehicle image successfully")
+                .data(vehicleService.uploadImage(UploadImageRequestDTO.builder()
+                        .vehicleId(id)
+                        .file(file)
+                        .build()))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

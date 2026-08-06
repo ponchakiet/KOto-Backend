@@ -2,6 +2,7 @@ package poncha.kiet.vehicleservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Vehicle {
     @Id
     private String id;
@@ -33,4 +36,9 @@ public class Vehicle {
     private String projectId;
     private String userId;
     private List<Content> contents;
+
+    public void addContent(Content content) {
+        if (contents == null)
+            contents = new ArrayList<>();
+    }
 }
