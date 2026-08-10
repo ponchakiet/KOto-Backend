@@ -34,13 +34,15 @@ public abstract class VehicleMapperDecorator implements VehicleMapper {
     @Override
     public VehicleResponseDTO toDto(Vehicle vehicle) {
         VehicleResponseDTO response = vehicleMapper.toDto(vehicle);
-        Category category = categoryRepository.findById(vehicle.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Not found category"));
+        if (vehicle.getCategoryId() != null) {
+            Category category = categoryRepository.findById(vehicle.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Not found category"));
 
-        response.setCategory(CategoryResponseDTO.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .build());
+            response.setCategory(CategoryResponseDTO.builder()
+                    .id(category.getId())
+                    .name(category.getName())
+                    .build());
+        }
 
         return response;
     }

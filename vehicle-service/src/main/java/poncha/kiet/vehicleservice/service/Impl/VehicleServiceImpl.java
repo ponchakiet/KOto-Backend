@@ -67,7 +67,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Page<VehicleSummaryResponseDTO> findAll(String userId, Pageable pageable) {
-        Page<VehicleSummary> page = vehicleRepository.findAllByUserId(userId, pageable);
+        Page<VehicleSummary> page = vehicleRepository.findAllByUserIdAndType(userId, VehicleType.PERSIST, pageable);
 
         return page.map(vehicleMapper::toSummary);
     }
@@ -96,10 +96,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Map<String, String> uploadImage(UploadImageRequestDTO request) {
+    public Map<String, String> uploadImage(String userId, UploadImageRequestDTO request) {
         Vehicle vehicle;
         if (request.getVehicleId() == null) {
             vehicle = Vehicle.builder()
+                    .userId(userId)
                     .id(UUID.randomUUID().toString())
                     .build();
         } else

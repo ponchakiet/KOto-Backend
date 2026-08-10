@@ -7,7 +7,7 @@ import poncha.kiet.postservice.grpc.VehicleResponse;
 import poncha.kiet.postservice.mapper.VehicleMapper;
 
 @NoArgsConstructor
-public class VehicleMapperDecorator implements VehicleMapper {
+public abstract class VehicleMapperDecorator implements VehicleMapper {
     @Autowired
     private VehicleMapper vehicleMapper;
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface VehicleRepository extends MongoRepository<Vehicle,String> {
-    Page<VehicleSummary> findAllByUserId(String userId, Pageable pageable);
+    Page<VehicleSummary> findAllByUserIdAndType(String userId, VehicleType type, Pageable pageable);
 
     List<Vehicle> findAllByTypeAndUserId(VehicleType type, String userId);
 }

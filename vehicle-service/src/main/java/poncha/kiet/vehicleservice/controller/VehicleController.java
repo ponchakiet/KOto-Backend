@@ -98,10 +98,11 @@ public class VehicleController {
             @RequestParam(value = "vehicleId", required = false) String id,
             @RequestParam(value = "file") MultipartFile file
     ) {
+        String userId = "ssss";
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Upload vehicle image successfully")
-                .data(vehicleService.uploadImage(UploadImageRequestDTO.builder()
+                .data(vehicleService.uploadImage(userId, UploadImageRequestDTO.builder()
                         .vehicleId(id)
                         .file(file)
                         .build()))

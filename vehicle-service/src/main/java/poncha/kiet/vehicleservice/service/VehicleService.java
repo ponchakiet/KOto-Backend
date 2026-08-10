@@ -21,7 +21,7 @@ public interface VehicleService {
 
     void linkVehicleToProject(String vehicleId, String projectId);
 
-    Map<String, String> uploadImage(UploadImageRequestDTO request);
+    Map<String, String> uploadImage(String userId, UploadImageRequestDTO request);
 
     void updateVehicle(VehicleRequestDTO request);
 }
