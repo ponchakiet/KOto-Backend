@@ -8,16 +8,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.CommentResponseDTO;
+import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
+import poncha.kiet.postservice.dto.response.StatusCountResponseDTO;
 import poncha.kiet.postservice.entity.*;
 import poncha.kiet.postservice.exception.ResourceNotFoundException;
 import poncha.kiet.postservice.exception.UnauthorizedException;
+import poncha.kiet.postservice.grpc.Content;
 import poncha.kiet.postservice.grpc.VehicleRequest;
 import poncha.kiet.postservice.grpc.VehicleResponse;
 import poncha.kiet.postservice.grpc.VehicleToPostServiceGrpc;
 import poncha.kiet.postservice.mapper.CommentMapper;
 import poncha.kiet.postservice.mapper.PostMapper;
 import poncha.kiet.postservice.mapper.VehicleMapper;
+import poncha.kiet.postservice.projection.PostOverview;
+import poncha.kiet.postservice.projection.StatusCount;
 import poncha.kiet.postservice.repository.CommentRepository;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
@@ -46,7 +51,7 @@ public class PostServiceImpl implements PostService {
                 .build());
 
         Post post = postMapper.toEntity(request);
-        post.setStatus(PostStatus.CREATED);
+        post.setStatus(PostStatus.WAITING_PAYMENT);
 
         postRepository.save(post);
     }
@@ -153,6 +158,26 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Page<PostOverviewResponseDTO> findAllByStatus(String status, String userId, Pageable pageable) {
+        Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, status);
+
+        Page<PostOverviewResponseDTO> data = postOverviews
+                .map(p -> {
+                    PostOverviewResponseDTO postOverviewResponseDTO = postMapper.toOverview(p);
+                    Content content = vehicleServiceBlockingStub.getPoster(
+                            VehicleRequest.newBuilder()
+                                    .setUserId(userId)
+                                    .setId(p.getVehicleId())
+                                    .build()
+                    );
+                    postOverviewResponseDTO.setPosterUrl(content.getUrl());
+                    return postOverviewResponseDTO;
+                });
+
+        return data;
+    }
+
+    @Override
     @Transactional
     public Map<String, String> createComment(String postId, Map<String, String> content) {
         Post post = postRepository.findById(postId)
@@ -183,7 +208,7 @@ public class PostServiceImpl implements PostService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Not found comment"));
 
-        if(!comment.getUserId().equals(content.get("userId")))
+        if (!comment.getUserId().equals(content.get("userId")))
             throw new UnauthorizedException("Don't have permission for this resource");
 
         post.removeComment(comment);
@@ -194,5 +219,17 @@ public class PostServiceImpl implements PostService {
     public Page<CommentResponseDTO> findCommentsByPostId(String postId, Pageable pageable) {
         Page<Comment> comments = commentRepository.findAllByPostId(postId, pageable);
         return comments.map(commentMapper::toDto);
+    }
+
+    @Override
+    public List<StatusCountResponseDTO> countStatusPost(String userId) {
+        List<StatusCount> counts = postRepository.countStatusPost(userId);
+
+        return counts.stream()
+                .map(c -> StatusCountResponseDTO.builder()
+                        .count(c.getCount())
+                        .name(c.getStatus())
+                        .build())
+                .toList();
     }
 }

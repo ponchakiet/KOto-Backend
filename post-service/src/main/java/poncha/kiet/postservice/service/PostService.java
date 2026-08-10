@@ -4,8 +4,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.CommentResponseDTO;
+import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
+import poncha.kiet.postservice.dto.response.StatusCountResponseDTO;
 
+import java.util.List;
 import java.util.Map;
 
 public interface PostService {
@@ -25,9 +28,13 @@ public interface PostService {
 
     Page<PostResponseDTO> findAll(Pageable pageable, String type);
 
+    Page<PostOverviewResponseDTO> findAllByStatus(String status, String userId, Pageable pageable);
+
     Map<String, String> createComment(String postId, Map<String, String> content);
 
     void deleteComment(String postId, Map<String, String> content);
 
     Page<CommentResponseDTO> findCommentsByPostId(String postId, Pageable pageable);
+
+    List<StatusCountResponseDTO> countStatusPost(String userId);
 }

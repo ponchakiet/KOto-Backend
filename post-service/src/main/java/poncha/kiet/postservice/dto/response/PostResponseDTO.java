@@ -18,6 +18,7 @@ public class PostResponseDTO {
     private String type;
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdated;
+    private double price;
     private String userId;
     private String status;
     private VehicleDetailResponseDTO vehicleDetail;

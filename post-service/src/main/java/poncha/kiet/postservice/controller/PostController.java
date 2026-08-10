@@ -7,14 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
-import poncha.kiet.postservice.dto.response.CommentResponseDTO;
-import poncha.kiet.postservice.dto.response.PageResponse;
-import poncha.kiet.postservice.dto.response.PostResponseDTO;
-import poncha.kiet.postservice.dto.response.Response;
+import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.service.PostService;
 
 import java.awt.print.Pageable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,6 +44,33 @@ public class PostController {
                 .timestamp(LocalDateTime.now())
                 .build());
     }
+
+    @GetMapping("/status")
+    public ResponseEntity<Response<PageResponse<PostOverviewResponseDTO>>> getPostsByStatus(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String status
+    ) {
+        String userId = "ssss";
+        return ResponseEntity.ok(Response.<PageResponse<PostOverviewResponseDTO>>builder()
+                .success(true)
+                .message("Get posts by status successfully")
+                .data(PageResponse.build(postService.findAllByStatus(status, userId, PageRequest.of(page, size))))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/count-status")
+    public ResponseEntity<Response<List<StatusCountResponseDTO>>> getSummaryPostStatus() {
+        String userId = "ssss";
+        return ResponseEntity.ok(Response.<List<StatusCountResponseDTO>>builder()
+                .success(true)
+                .message("Get summary post status successfully")
+                .data(postService.countStatusPost(userId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
 
     @PostMapping
     public ResponseEntity<Response<Void>> createPost(@RequestBody PostRequestDTO request) {

@@ -7,6 +7,7 @@ option java_outer_classname = "VehicleToPostProto";
 service VehicleToPostService {
   rpc checkExisted(VehicleRequest) returns (CheckExistedResponse);
   rpc getVehicleDetail(VehicleRequest) returns (VehicleResponse);
+  rpc getPoster(VehicleRequest) returns (Content);
 }
 
 message VehicleRequest {
