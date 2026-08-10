@@ -24,17 +24,20 @@ public class Vehicle {
     private String id;
     private String name;
     private String description;
-    @CreatedDate
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
     private String province;
     private String ward;
     private String address;
     private double price;
     private int manufactureYear;
     private Map<String, String> properties;
+    private String[] otherInfo;
     private String projectId;
     private String userId;
+    private String categoryId;
+    @Builder.Default
+    private VehicleType type = VehicleType.DRAFT;
     private List<Content> contents;
 
     public void addContent(Content content) {

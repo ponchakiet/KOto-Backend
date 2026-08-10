@@ -15,7 +15,6 @@ import java.util.Map;
 public class VehicleRequestDTO {
     private String id;
     private String name;
-    private String description;
     private LocalDateTime createdAt;
     private String province;
     private String ward;
@@ -23,7 +22,10 @@ public class VehicleRequestDTO {
     private double price;
     private int manufactureYear;
     private Map<String, String> properties;
+    private String[] otherInfo;
+    private String type;
     private String projectId;
     private String userId;
+    private String categoryId;
     private List<Content> contents;
 }

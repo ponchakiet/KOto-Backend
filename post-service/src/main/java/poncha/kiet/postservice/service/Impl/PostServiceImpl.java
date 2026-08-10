@@ -52,7 +52,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePost(String postId, String userId, Map<String, String> updateRequest) {
+    public Map<String, String> updatePost(String postId, String userId, Map<String, String> updateRequest) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
@@ -68,6 +68,7 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.save(post);
+        return updateRequest;
     }
 
     @Override

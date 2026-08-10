@@ -18,12 +18,14 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
+
     @PostMapping
-    public ResponseEntity<Response<Void>> createProject(@RequestBody ProjectRequestDTO request) {
-        projectService.createProject(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
+    public ResponseEntity<Response<ProjectRequestDTO>> createProject(@RequestBody ProjectRequestDTO request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Response.<ProjectRequestDTO>builder()
                 .success(true)
                 .message("Create project successfully")
+                .data(projectService.createProject(request))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

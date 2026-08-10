@@ -9,6 +9,7 @@ import poncha.kiet.uploadservice.grpc.FileChunk;
 import poncha.kiet.uploadservice.grpc.UploadResponse;
 import poncha.kiet.uploadservice.grpc.UploadServiceGrpc;
 import poncha.kiet.uploadservice.utils.Helper;
+import poncha.kiet.uploadservice.utils.MediaType;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -80,9 +81,9 @@ public class UploadServiceGrpcImpl extends UploadServiceGrpc.UploadServiceImplBa
                     double duration = 0;
 
                     if (contentType.startsWith("image/")) {
-                        type = "image";
+                        type = String.valueOf(MediaType.IMAGE);
                     } else if (contentType.startsWith("video/")) {
-                        type = "video";
+                        type = String.valueOf(MediaType.VIDEO);
                         try {
                             Path tempFile = Files.createTempFile("temp-", fileName);
                             Files.write(tempFile, fileBytes);

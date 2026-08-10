@@ -1,17 +1,22 @@
 package poncha.kiet.vehicleservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import poncha.kiet.vehicleservice.dto.request.UploadImageRequestDTO;
+import poncha.kiet.vehicleservice.dto.response.PageResponse;
 import poncha.kiet.vehicleservice.dto.response.Response;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
+import poncha.kiet.vehicleservice.dto.response.VehicleSummaryResponseDTO;
+import poncha.kiet.vehicleservice.entity.VehicleType;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +24,33 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class VehicleController {
     private final VehicleService vehicleService;
+
+    @GetMapping
+    public ResponseEntity<Response<PageResponse<VehicleSummaryResponseDTO>>> getVehicles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        String userId = "ssss";
+        return ResponseEntity.ok(Response.<PageResponse<VehicleSummaryResponseDTO>>builder()
+                .success(true)
+                .message("Get vehicles successfully")
+                .data(PageResponse.build(vehicleService.findAll(userId, PageRequest.of(page, size))))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/draft")
+    public ResponseEntity<Response<List<VehicleResponseDTO>>> getVehiclesDraft() {
+        String userId = "ssss";
+        String type = String.valueOf(VehicleType.DRAFT);
+
+        return ResponseEntity.ok(Response.<List<VehicleResponseDTO>>builder()
+                .success(true)
+                .message("Get vehicles draft successfully")
+                .data(vehicleService.findVehicleByType(type, userId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
 
     @GetMapping("/{vehicleId}")
     public ResponseEntity<Response<VehicleResponseDTO>> getVehicleById(@PathVariable("vehicleId") String vehicleId) {
@@ -52,7 +84,16 @@ public class VehicleController {
                 .build());
     }
 
-    @PutMapping("/upload")
+    @PutMapping
+    public ResponseEntity<Response<Void>> updateVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) {
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Update vehicle successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PostMapping("/upload")
     public ResponseEntity<Response<Map<String, String>>> uploadVehicleImage(
             @RequestParam(value = "vehicleId", required = false) String id,
             @RequestParam(value = "file") MultipartFile file

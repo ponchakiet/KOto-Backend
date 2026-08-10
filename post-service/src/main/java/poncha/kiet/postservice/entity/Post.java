@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class Post {
     private LocalDateTime createdAt;
 
     @Column(name = "last_updated")
+    @LastModifiedDate
     private LocalDateTime lastUpdated;
 
     @Column(name = "vehicle_id")

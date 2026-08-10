@@ -9,7 +9,7 @@ import poncha.kiet.postservice.entity.Post;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {VehicleMapper.class})
 public interface PostMapper {
     Post toEntity(PostRequestDTO request);
     PostResponseDTO toDto(Post post);

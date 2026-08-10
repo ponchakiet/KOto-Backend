@@ -21,12 +21,14 @@ public class ProjectServiceImpl implements ProjectService {
     private final DealerRepository dealerRepository;
 
     @Override
-    public void createProject(ProjectRequestDTO request) {
+    public ProjectRequestDTO createProject(ProjectRequestDTO request) {
         Dealer dealer = dealerRepository.findById(request.getDealerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Not found dealer: " + request.getDealerId()));
 
         Project project = projectMapper.toEntity(request);
         project.setId(UUID.randomUUID().toString());
          projectRepository.save(project);
+         return request;
+
     }
 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class PostRequestDTO {
     private String title;
     private String description;
-    private LocalDateTime lastUpdated;
     private String vehicleId;
     private String userId;
+    private String type;
 }

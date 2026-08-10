@@ -11,7 +11,7 @@ import java.util.Map;
 public interface PostService {
     void createPost(PostRequestDTO request);
 
-    void updatePost(String postId, String userId, Map<String, String> updateRequest);
+    Map<String, String> updatePost(String postId, String userId, Map<String, String> updateRequest);
 
     void inActivePost(String userId, String postId);
 

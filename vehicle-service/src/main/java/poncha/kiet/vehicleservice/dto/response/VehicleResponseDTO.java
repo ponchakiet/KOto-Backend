@@ -24,8 +24,10 @@ public class VehicleResponseDTO {
     private String address;
     private double price;
     private int manufactureYear;
+    private String[] otherInfo;
     private Map<String, String> properties;
     private String projectId;
     private String userId;
     private List<Content> contents;
+    private CategoryResponseDTO category;
 }
