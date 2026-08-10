@@ -8,13 +8,14 @@ import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
 import poncha.kiet.postservice.dto.response.StatusCountResponseDTO;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 
 public interface PostService {
     void createPost(PostRequestDTO request);
 
-    Map<String, String> updatePost(String postId, String userId, Map<String, String> updateRequest);
+    Map<String, String> updatePost(String postId, String userId, PostRequestDTO updateRequest) throws AccessDeniedException;
 
     void inActivePost(String userId, String postId);
 
@@ -28,7 +29,7 @@ public interface PostService {
 
     Page<PostResponseDTO> findAll(Pageable pageable, String type);
 
-    Page<PostOverviewResponseDTO> findAllByStatus(String status, String userId, Pageable pageable);
+    Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable);
 
     Map<String, String> createComment(String postId, Map<String, String> content);
 

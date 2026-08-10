@@ -112,6 +112,7 @@ public class VehicleGrpcServiceImpl extends VehicleToPostServiceGrpc.VehicleToPo
                 }).toList();
 
         VehicleResponse response = VehicleResponse.newBuilder()
+                .setId(vehicle.getId())
                 .addAllContentList(contentList)
                 .setAddress(vehicle.getAddress())
                 .setName(vehicle.getName())

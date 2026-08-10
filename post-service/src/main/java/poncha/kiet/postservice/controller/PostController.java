@@ -1,6 +1,7 @@
 package poncha.kiet.postservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,9 @@ import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.service.PostService;
 
 import java.awt.print.Pageable;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,13 +52,37 @@ public class PostController {
     public ResponseEntity<Response<PageResponse<PostOverviewResponseDTO>>> getPostsByStatus(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam String status
+            @RequestParam String status,
+            @RequestParam(defaultValue = "") String kw
     ) {
         String userId = "ssss";
         return ResponseEntity.ok(Response.<PageResponse<PostOverviewResponseDTO>>builder()
                 .success(true)
                 .message("Get posts by status successfully")
-                .data(PageResponse.build(postService.findAllByStatus(status, userId, PageRequest.of(page, size))))
+                .data(PageResponse.build(postService.findAllByStatus(status, kw, userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<Response<Map<String, String>>> updatePost(@PathVariable("postId") String postId,
+                                                                    @RequestBody PostRequestDTO postRequestDTO) throws AccessDeniedException {
+        String userId = "ssss";
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
+                .success(true)
+                .message("Update post successfully")
+                .data(postService.updatePost(postId, userId, postRequestDTO))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Response<Void>> deletePost(@PathVariable("postId") String postId) {
+        String userId = "ssss";
+        postService.inActivePost(userId, postId);
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Delete post successfully")
                 .timestamp(LocalDateTime.now())
                 .build());
     }
@@ -70,7 +97,6 @@ public class PostController {
                 .timestamp(LocalDateTime.now())
                 .build());
     }
-
 
     @PostMapping
     public ResponseEntity<Response<Void>> createPost(@RequestBody PostRequestDTO request) {

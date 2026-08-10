@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import poncha.kiet.postservice.entity.Post;
+import poncha.kiet.postservice.entity.PostStatus;
 import poncha.kiet.postservice.entity.PostType;
 import poncha.kiet.postservice.projection.PostOverview;
 import poncha.kiet.postservice.projection.StatusCount;
@@ -14,10 +15,15 @@ import poncha.kiet.postservice.projection.StatusCount;
 import java.util.List;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post,String> {
+public interface PostRepository extends JpaRepository<Post, String> {
     Page<Post> findAllByType(Pageable pageable, PostType type);
 
-    Page<PostOverview> findAllByStatus(Pageable pageable, String status);
+    @Query("""
+            from Post p
+            WHERE p.title like concat('%',:kw,'%')
+            AND p.status = :status 
+            """)
+    Page<PostOverview> findAllByStatus(Pageable pageable, @Param("kw") String kw, @Param("status") PostStatus status);
 
     @Query(value = """
             SELECT s.status AS status, COUNT(p.id) AS count

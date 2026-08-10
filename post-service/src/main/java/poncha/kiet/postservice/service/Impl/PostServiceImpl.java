@@ -27,6 +27,7 @@ import poncha.kiet.postservice.repository.CommentRepository;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -57,23 +58,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Map<String, String> updatePost(String postId, String userId, Map<String, String> updateRequest) {
+    public Map<String, String> updatePost(String postId, String userId, PostRequestDTO updateRequest) throws AccessDeniedException {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
         if (!post.getUserId().equals(userId))
-            throw new UnauthorizedException("Don't have permission for this resource");
+            throw new AccessDeniedException("Don't have permission for this resource");
 
-        if (updateRequest.containsKey("title")) {
-            post.setTitle(updateRequest.get("title"));
-        }
-
-        if (updateRequest.containsKey("description")) {
-            post.setDescription(updateRequest.get("description"));
-        }
-
+        postMapper.update(updateRequest, post);
         postRepository.save(post);
-        return updateRequest;
+        return Map.of("id", post.getId());
     }
 
     @Override
@@ -158,8 +152,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostOverviewResponseDTO> findAllByStatus(String status, String userId, Pageable pageable) {
-        Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, status);
+    public Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable) {
+        Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, kw, PostStatus.valueOf(status));
 
         Page<PostOverviewResponseDTO> data = postOverviews
                 .map(p -> {

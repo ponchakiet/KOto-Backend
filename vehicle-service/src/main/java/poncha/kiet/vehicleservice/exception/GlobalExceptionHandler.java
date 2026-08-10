@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import poncha.kiet.vehicleservice.dto.response.Response;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -94,6 +95,18 @@ public class GlobalExceptionHandler {
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Response<?>> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+        Response<?> errorResponse = Response.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .errors(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<?>> handleGlobalException(Exception ex, HttpServletRequest request) {

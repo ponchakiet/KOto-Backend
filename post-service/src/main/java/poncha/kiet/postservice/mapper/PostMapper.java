@@ -1,6 +1,7 @@
 package poncha.kiet.postservice.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
@@ -14,6 +15,8 @@ import poncha.kiet.postservice.projection.PostOverview;
         unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {VehicleMapper.class})
 public interface PostMapper {
     Post toEntity(PostRequestDTO request);
+
+    void update(PostRequestDTO request, @MappingTarget Post post);
 
     PostOverviewResponseDTO toOverview(PostOverview postOverview);
 
