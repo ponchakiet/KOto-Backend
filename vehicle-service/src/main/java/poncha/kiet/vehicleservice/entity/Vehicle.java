@@ -22,8 +22,6 @@ import java.util.Map;
 public class Vehicle {
     @Id
     private String id;
-    private String name;
-    private String description;
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private String province;

@@ -22,7 +22,7 @@ spring:
 
 grpc:
   client:
-    vehicleService:
+    vehicleServiceGrpc:
       address: "discovery:///vehicle-service"
       negotiationType: PLAINTEXT
   server:

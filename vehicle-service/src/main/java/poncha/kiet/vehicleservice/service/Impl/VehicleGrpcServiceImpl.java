@@ -7,18 +7,17 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import poncha.kiet.vehicleservice.entity.ContentType;
 import poncha.kiet.vehicleservice.entity.Image;
 import poncha.kiet.vehicleservice.entity.Vehicle;
-import poncha.kiet.vehicleservice.entity.Video;
 import poncha.kiet.vehicleservice.grpc.*;
+import poncha.kiet.vehicleservice.mapper.VehicleMapper;
 import poncha.kiet.vehicleservice.repository.VehicleRepository;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @GrpcService
 @RequiredArgsConstructor
 public class VehicleGrpcServiceImpl extends VehicleToPostServiceGrpc.VehicleToPostServiceImplBase {
     private final VehicleRepository vehicleRepository;
+    private final VehicleMapper vehicleMapper;
 
     @Override
     public void getPoster(VehicleRequest request, StreamObserver<Content> responseObserver) {
@@ -89,40 +88,7 @@ public class VehicleGrpcServiceImpl extends VehicleToPostServiceGrpc.VehicleToPo
         }
         Vehicle vehicle = optionalVehicle.get();
 
-        List<Content> contentList = vehicle.getContents().stream()
-                .map(c -> {
-                    Content.Builder builder = Content.newBuilder();
-
-                    if (c instanceof Video video) {
-                        builder.setId(video.getId())
-                                .setDuration(video.getDuration())
-                                .setName(video.getName())
-                                .setType("Video")
-                                .setUrl(video.getUrl());
-                    } else if (c instanceof Image image) {
-                        builder.setId(image.getId())
-                                .setDuration(0)
-                                .setUrl(image.getUrl())
-                                .setName(image.getName())
-                                .setType("Image");
-                    } else {
-                        throw new IllegalArgumentException("Unknown content type: " + c.getClass().getName());
-                    }
-                    return builder.build();
-                }).toList();
-
-        VehicleResponse response = VehicleResponse.newBuilder()
-                .setId(vehicle.getId())
-                .addAllContentList(contentList)
-                .setAddress(vehicle.getAddress())
-                .setName(vehicle.getName())
-                .setDescription(vehicle.getDescription())
-                .setProvince(vehicle.getProvince())
-                .setWard(vehicle.getWard())
-                .setManufactureYear(vehicle.getManufactureYear())
-                .setPrice(vehicle.getPrice())
-                .putAllProperties(vehicle.getProperties())
-                .build();
+        VehicleResponse response = vehicleMapper.toResponse(vehicle);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

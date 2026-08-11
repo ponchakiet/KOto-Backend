@@ -33,7 +33,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
-    @GrpcClient("vehicleService")
+    @GrpcClient("vehicleServiceGrpc")
     private VehicleToPostServiceGrpc.VehicleToPostServiceBlockingStub vehicleServiceBlockingStub;
     private final PostMapper postMapper;
     private final PostRepository postRepository;

@@ -6,6 +6,7 @@ import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleSummaryResponseDTO;
 import poncha.kiet.vehicleservice.entity.Vehicle;
+import poncha.kiet.vehicleservice.grpc.VehicleResponse;
 import poncha.kiet.vehicleservice.mapper.decorator.VehicleMapperDecorator;
 import poncha.kiet.vehicleservice.projection.VehicleSummary;
 
@@ -15,6 +16,9 @@ import poncha.kiet.vehicleservice.projection.VehicleSummary;
 @DecoratedWith(VehicleMapperDecorator.class)
 public interface VehicleMapper {
     VehicleResponseDTO toDto(Vehicle vehicle);
+
+    @Mapping(target = "properties", ignore = true)
+    VehicleResponse toResponse(Vehicle vehicle);
 
     VehicleSummaryResponseDTO toSummary(VehicleSummary vehicleSummary);
 
