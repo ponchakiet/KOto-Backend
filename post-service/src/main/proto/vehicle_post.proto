@@ -3,7 +3,6 @@ option java_multiple_files = true;
 option java_package = "poncha.kiet.postservice.grpc";
 option java_outer_classname = "VehicleToPostProto";
 
-
 service VehicleToPostService {
   rpc checkExisted(VehicleRequest) returns (CheckExistedResponse);
   rpc getVehicleDetail(VehicleRequest) returns (VehicleResponse);
@@ -22,15 +21,20 @@ message CheckExistedResponse {
 
 message VehicleResponse {
   string id = 1;
+  string province = 2;
+  string ward = 3;
+  string address = 4;
+  double price = 5;
+  int32 manufactureYear = 6;
+  map<string, string> properties = 7;
+  repeated Content contentList = 8;
+  repeated string otherInfo = 9;
+  CategoryResponse category = 10;
+}
+
+message CategoryResponse {
+  string id = 1;
   string name = 2;
-  string description = 3;
-  string province = 4;
-  string ward = 5;
-  string address = 6;
-  double price = 7;
-  int32 manufactureYear = 8;
-  map<string, string> properties = 9;
-  repeated Content contentList = 10;
 }
 
 message Content {

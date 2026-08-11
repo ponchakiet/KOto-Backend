@@ -28,6 +28,8 @@ public interface PostService {
 
     Page<PostResponseDTO> findAll(Pageable pageable, String type);
 
+    List<PostResponseDTO> findAll();
+
     Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable);
 
     Map<String, String> createComment(String postId, Map<String, String> content);

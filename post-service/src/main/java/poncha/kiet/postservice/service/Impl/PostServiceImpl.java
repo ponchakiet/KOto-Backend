@@ -157,6 +157,21 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public List<PostResponseDTO> findAll() {
+        List<PostResponseDTO> postResponseDTOS = postRepository.findAll().stream()
+                .map(p -> {
+                    VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(
+                            VehicleRequest.newBuilder().setId(p.getVehicleId()).build()
+                    );
+                    PostResponseDTO postResponseDTO = postMapper.toDto(p);
+                    postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
+                    return postResponseDTO;
+                }).toList();
+
+        return postResponseDTOS;
+    }
+
+    @Override
     public Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable) {
         Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, kw, PostStatus.valueOf(status));
 

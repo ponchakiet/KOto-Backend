@@ -14,7 +14,7 @@ public abstract class VehicleMapperDecorator implements VehicleMapper {
     @Override
     public VehicleDetailResponseDTO toDto(VehicleResponse vehicle) {
         VehicleDetailResponseDTO vehicleDetailResponseDTO = vehicleMapper.toDto(vehicle);
-
+        vehicleDetailResponseDTO.setOtherInfo(vehicle.getOtherInfoList().toArray(new String[0]));
         vehicleDetailResponseDTO.setContents(
                 vehicle.getContentListList().stream()
                         .map(c -> VehicleDetailResponseDTO.Content.builder()

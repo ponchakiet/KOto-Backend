@@ -24,6 +24,7 @@ public class VehicleDetailResponseDTO {
     private double price;
     private int manufactureYear;
     private Map<String, String> properties;
+    private String[] otherInfo;
     private String projectId;
     private String userId;
     private List<Content> contents;

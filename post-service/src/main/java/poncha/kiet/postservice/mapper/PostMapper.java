@@ -9,6 +9,7 @@ import poncha.kiet.postservice.dto.response.PostHistoryResponseDTO;
 import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
 import poncha.kiet.postservice.entity.Post;
+import poncha.kiet.postservice.grpc.PostDetailResponse;
 import poncha.kiet.postservice.projection.PostHistory;
 import poncha.kiet.postservice.projection.PostOverview;
 
@@ -25,4 +26,6 @@ public interface PostMapper {
     PostHistoryResponseDTO toHistory(PostHistory postHistory);
 
     PostResponseDTO toDto(Post post);
+
+    PostDetailResponse toDetail(Post post);
 }
