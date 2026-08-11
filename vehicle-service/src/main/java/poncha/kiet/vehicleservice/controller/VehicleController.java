@@ -15,6 +15,7 @@ import poncha.kiet.vehicleservice.dto.response.VehicleSummaryResponseDTO;
 import poncha.kiet.vehicleservice.entity.VehicleType;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,8 @@ public class VehicleController {
 
     @PostMapping
     public ResponseEntity<Response<Void>> createVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) {
-        vehicleService.createVehicle(vehicleRequestDTO);
+        String userId = "ssss";
+        vehicleService.createVehicle(vehicleRequestDTO, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
                 .success(true)
                 .message("Create vehicle successfully")
@@ -85,7 +87,9 @@ public class VehicleController {
     }
 
     @PutMapping
-    public ResponseEntity<Response<Void>> updateVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) {
+    public ResponseEntity<Response<Void>> updateVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) throws AccessDeniedException {
+        String userId = "ssss";
+        vehicleService.updateVehicle(vehicleRequestDTO, userId);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
                 .message("Update vehicle successfully")
@@ -93,8 +97,19 @@ public class VehicleController {
                 .build());
     }
 
+    @DeleteMapping("/{vehicleId}")
+    public ResponseEntity<Response<Map<String, String>>> deleteVehicle(@PathVariable("vehicleId") String vehicleId) throws AccessDeniedException {
+        String userId = "ssss";
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
+                .success(true)
+                .message("Delete vehicle successfully")
+                .data(vehicleService.deleteVehicle(vehicleId, userId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
     @PostMapping("/upload")
-    public ResponseEntity<Response<Map<String, String>>> uploadVehicleImage(
+    public ResponseEntity<Response<Map<String, String>>> uploadVehicleMedia(
             @RequestParam(value = "vehicleId", required = false) String id,
             @RequestParam(value = "file") MultipartFile file
     ) {
@@ -102,7 +117,7 @@ public class VehicleController {
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Upload vehicle image successfully")
-                .data(vehicleService.uploadImage(userId, UploadImageRequestDTO.builder()
+                .data(vehicleService.uploadMedia(userId, UploadImageRequestDTO.builder()
                         .vehicleId(id)
                         .file(file)
                         .build()))

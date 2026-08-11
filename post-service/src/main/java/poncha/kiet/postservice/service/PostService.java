@@ -3,10 +3,7 @@ package poncha.kiet.postservice.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
-import poncha.kiet.postservice.dto.response.CommentResponseDTO;
-import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
-import poncha.kiet.postservice.dto.response.PostResponseDTO;
-import poncha.kiet.postservice.dto.response.StatusCountResponseDTO;
+import poncha.kiet.postservice.dto.response.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -26,6 +23,8 @@ public interface PostService {
     void unlikePost(String userId, String postId);
 
     PostResponseDTO findPostById(String postId);
+
+    Page<PostHistoryResponseDTO> findHistoryPost(String vehicleId, String userId, Pageable pageable);
 
     Page<PostResponseDTO> findAll(Pageable pageable, String type);
 

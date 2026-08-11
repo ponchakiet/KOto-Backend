@@ -1,0 +1,17 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "poncha.kiet.vehicleservice.grpc";
+option java_outer_classname = "PostToVehicleProto";
+
+service PostToVehicleService {
+  rpc checkAttachedPost(PostCheckAttachRequest) returns(PostCheckAttachResponse);
+}
+
+message PostCheckAttachRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message PostCheckAttachResponse {
+  bool isAttached = 1;
+}

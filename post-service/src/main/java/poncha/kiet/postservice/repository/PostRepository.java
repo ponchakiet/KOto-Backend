@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import poncha.kiet.postservice.entity.Post;
 import poncha.kiet.postservice.entity.PostStatus;
 import poncha.kiet.postservice.entity.PostType;
+import poncha.kiet.postservice.projection.PostHistory;
 import poncha.kiet.postservice.projection.PostOverview;
 import poncha.kiet.postservice.projection.StatusCount;
 
@@ -16,7 +17,16 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
-    Page<Post> findAllByType(Pageable pageable, PostType type);
+    @Query("""
+            from Post p
+            WHERE p.type = :type
+            AND p.status = :status 
+            """)
+    Page<Post> findAllByType(Pageable pageable, @Param("type") PostType type, @Param("status") PostStatus status);
+
+    boolean existsByVehicleIdAndStatus(String vehicleId, PostStatus status);
+
+    Page<PostHistory> findAllByVehicleIdAndUserId(String vehicleId, String userId, Pageable pageable);
 
     @Query("""
             from Post p

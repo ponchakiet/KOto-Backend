@@ -1,7 +1,6 @@
 package poncha.kiet.postservice.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -11,10 +10,8 @@ import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.service.PostService;
 
-import java.awt.print.Pageable;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +80,21 @@ public class PostController {
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
                 .message("Delete post successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/history/{vehicleId}")
+    public ResponseEntity<Response<PageResponse<PostHistoryResponseDTO>>> getHistoryPost(
+            @PathVariable("vehicleId") String vehicleId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        String userId = "ssss";
+        return ResponseEntity.ok(Response.<PageResponse<PostHistoryResponseDTO>>builder()
+                .success(true)
+                .message("Get history post successfully")
+                .data(PageResponse.build(postService.findHistoryPost(vehicleId, userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

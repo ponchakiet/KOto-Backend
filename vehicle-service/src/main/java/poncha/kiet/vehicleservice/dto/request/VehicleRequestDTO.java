@@ -25,7 +25,6 @@ public class VehicleRequestDTO {
     private String[] otherInfo;
     private String type;
     private String projectId;
-    private String userId;
     private String categoryId;
     private List<Content> contents;
 }

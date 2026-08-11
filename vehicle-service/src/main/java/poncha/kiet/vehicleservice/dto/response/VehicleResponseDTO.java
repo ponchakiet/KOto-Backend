@@ -17,7 +17,7 @@ import java.util.Map;
 public class VehicleResponseDTO {
     private String id;
     private String name;
-    private String description;
+    private boolean isAttachedPostShow;
     private LocalDateTime createdAt;
     private String province;
     private String ward;

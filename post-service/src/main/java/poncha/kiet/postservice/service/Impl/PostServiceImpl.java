@@ -7,10 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
-import poncha.kiet.postservice.dto.response.CommentResponseDTO;
-import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
-import poncha.kiet.postservice.dto.response.PostResponseDTO;
-import poncha.kiet.postservice.dto.response.StatusCountResponseDTO;
+import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.entity.*;
 import poncha.kiet.postservice.exception.ResourceNotFoundException;
 import poncha.kiet.postservice.exception.UnauthorizedException;
@@ -21,6 +18,7 @@ import poncha.kiet.postservice.grpc.VehicleToPostServiceGrpc;
 import poncha.kiet.postservice.mapper.CommentMapper;
 import poncha.kiet.postservice.mapper.PostMapper;
 import poncha.kiet.postservice.mapper.VehicleMapper;
+import poncha.kiet.postservice.projection.PostHistory;
 import poncha.kiet.postservice.projection.PostOverview;
 import poncha.kiet.postservice.projection.StatusCount;
 import poncha.kiet.postservice.repository.CommentRepository;
@@ -135,8 +133,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Page<PostHistoryResponseDTO> findHistoryPost(String vehicleId, String userId, Pageable pageable) {
+        Page<PostHistory> postHistories = postRepository.findAllByVehicleIdAndUserId(vehicleId, userId, pageable);
+
+        return postHistories.map(postMapper::toHistory);
+    }
+
+    @Override
     public Page<PostResponseDTO> findAll(Pageable pageable, String type) {
-        Page<Post> postPage = postRepository.findAllByType(pageable, PostType.valueOf(type));
+        Page<Post> postPage = postRepository.findAllByType(pageable, PostType.valueOf(type), PostStatus.SHOW);
 
         Page<PostResponseDTO> posts = postPage
                 .map(p -> {

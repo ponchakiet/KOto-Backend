@@ -14,12 +14,11 @@ import poncha.kiet.vehicle.grpc.UploadServiceGrpc;
 import poncha.kiet.vehicleservice.dto.request.UploadImageRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleSummaryResponseDTO;
 import poncha.kiet.vehicleservice.entity.*;
+import poncha.kiet.vehicleservice.entity.Content;
 import poncha.kiet.vehicleservice.exception.ResourceNotFoundException;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
-import poncha.kiet.vehicleservice.grpc.UserRequest;
-import poncha.kiet.vehicleservice.grpc.UserResponse;
-import poncha.kiet.vehicleservice.grpc.UserToVehicleServiceGrpc;
+import poncha.kiet.vehicleservice.grpc.*;
 import poncha.kiet.vehicleservice.mapper.VehicleMapper;
 import poncha.kiet.vehicleservice.projection.VehicleSummary;
 import poncha.kiet.vehicleservice.repository.ProjectRepository;
@@ -28,6 +27,7 @@ import poncha.kiet.vehicleservice.service.VehicleService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +43,8 @@ public class VehicleServiceImpl implements VehicleService {
     private UserToVehicleServiceGrpc.UserToVehicleServiceBlockingStub serviceBlockingStub;
     @GrpcClient("uploadServiceGrpc")
     private UploadServiceGrpc.UploadServiceStub uploadServiceStub;
+    @GrpcClient("postServiceGrpc")
+    private PostToVehicleServiceGrpc.PostToVehicleServiceBlockingStub postServiceStub;
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
     private final ProjectRepository projectRepository;
@@ -52,7 +54,14 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
-        return vehicleMapper.toDto(vehicle);
+        PostCheckAttachResponse postCheckAttachResponse = postServiceStub.checkAttachedPost(
+                PostCheckAttachRequest.newBuilder()
+                        .setId(vehicle.getId())
+                        .build()
+        );
+        VehicleResponseDTO response = vehicleMapper.toDto(vehicle);
+        response.setAttachedPostShow(postCheckAttachResponse.getIsAttached());
+        return response;
     }
 
     @Override
@@ -73,9 +82,31 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public void createVehicle(VehicleRequestDTO vehicleRequestDTO) {
+    public Map<String, String> deleteVehicle(String vehicleId, String userId) throws AccessDeniedException {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found asset"));
+
+        if (!vehicle.getUserId().equals(userId))
+            throw new AccessDeniedException("Don't have permission for this resource");
+
+        PostCheckAttachResponse response = postServiceStub.checkAttachedPost(
+                PostCheckAttachRequest.newBuilder()
+                        .setId(vehicle.getId())
+                        .build());
+
+        if(response.getIsAttached())
+            throw new RuntimeException("Vehicle is showing");
+
+        vehicle.setType(VehicleType.DELETE);
+        vehicleRepository.save(vehicle);
+        
+        return Map.of("id", vehicle.getId());
+    }
+
+    @Override
+    public void createVehicle(VehicleRequestDTO vehicleRequestDTO, String userId) {
         UserResponse userResponse = serviceBlockingStub.getUserById(UserRequest.newBuilder()
-                .setId(vehicleRequestDTO.getUserId())
+                .setId(userId)
                 .build());
         Vehicle vehicle = vehicleMapper.toEntity(vehicleRequestDTO);
         vehicle.getContents().forEach(Content::generateId);
@@ -96,7 +127,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Map<String, String> uploadImage(String userId, UploadImageRequestDTO request) {
+    public Map<String, String> uploadMedia(String userId, UploadImageRequestDTO request) {
         Vehicle vehicle;
         if (request.getVehicleId() == null) {
             vehicle = Vehicle.builder()
@@ -148,7 +179,7 @@ public class VehicleServiceImpl implements VehicleService {
 
             UploadResponse uploadResponse = responses[0];
 
-            if (uploadResponse.getType().equals(ContentType.IMAGE)) {
+            if (uploadResponse.getType().equals(ContentType.IMAGE.name())) {
                 Image image = Image.builder()
                         .id(UUID.randomUUID().toString())
                         .url(uploadResponse.getUrl())
@@ -180,13 +211,16 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public void updateVehicle(VehicleRequestDTO request) {
+    public void updateVehicle(VehicleRequestDTO request, String userId) throws AccessDeniedException {
         UserResponse userResponse = serviceBlockingStub.getUserById(UserRequest.newBuilder()
-                .setId(request.getUserId())
+                .setId(userId)
                 .build());
 
         Vehicle vehicle = vehicleRepository.findById(request.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Not foung vehicle"));
+                .orElseThrow(() -> new ResourceNotFoundException("Not found vehicle"));
+
+        if (!vehicle.getUserId().equals(userId))
+            throw new AccessDeniedException("Don't have permission for this resource");
 
         vehicleMapper.update(request, vehicle);
         vehicleRepository.save(vehicle);
