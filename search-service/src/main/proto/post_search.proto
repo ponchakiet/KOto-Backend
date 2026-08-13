@@ -1,0 +1,60 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "poncha.kiet.searchservice.grpc";
+option java_outer_classname = "PostToSearchProto";
+
+
+service PostToSearchService {
+  rpc getAllPost(Empty) returns(PostDetailResponseList);
+}
+
+message Empty {
+
+}
+message PostDetailResponseList {
+  repeated PostDetailResponse response = 1;
+}
+message PostDetailResponse {
+  string id = 1;
+  string title = 2;
+  string description = 3;;
+  double price = 4;
+  string type = 5;
+  string lastUpdated = 6;
+  string createdAt = 7;
+  string status = 8;
+  VehicleResponse vehicleDetail = 9;
+  UserInfoResponse userInfo = 10;
+}
+
+message UserInfoResponse {
+  string id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string avt = 4;
+}
+
+message VehicleResponse {
+  string id = 1;
+  string province = 2;
+  string ward = 3;
+  string address = 4;
+  double price = 5;
+  int32 manufactureYear = 6;
+  map<string, string> properties = 7;
+  repeated Content contentList = 8;
+  repeated string otherInfo = 9;
+  CategoryResponse category = 10;
+
+}
+message CategoryResponse {
+  string id = 1;
+  string name = 2;
+}
+message Content {
+  string id = 1;
+  string url = 2;
+  string name = 3;
+  double duration = 4;
+  string type = 5;
+}

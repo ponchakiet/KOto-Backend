@@ -1,0 +1,23 @@
+server:
+  port: 8085
+  servlet:
+    context-path: /search-service
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 50MB
+  elasticsearch:
+    uris: http://localhost:9200
+    username: docker-cluster
+    password: Ngocmai@1004
+    index-recovery:
+      mode: full
+
+grpc:
+  client:
+    postServiceGrpc:
+      address: "discovery:///post-service"
+      negotiationType: PLAINTEXT

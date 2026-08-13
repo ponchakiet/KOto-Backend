@@ -20,6 +20,7 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
     @Column(name = "title")
     private String title;
 
