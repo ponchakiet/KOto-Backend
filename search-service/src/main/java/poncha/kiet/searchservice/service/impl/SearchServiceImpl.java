@@ -1,6 +1,7 @@
 package poncha.kiet.searchservice.service.impl;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.aggregations.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
@@ -8,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
@@ -26,6 +30,7 @@ import poncha.kiet.searchservice.mapper.PostMapper;
 import poncha.kiet.searchservice.service.SearchService;
 import poncha.kiet.searchservice.utils.FilterUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -59,8 +64,73 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<FilterSearchResponseDTO> getAggregation(String keyword) {
-        return null;
+    public List<FilterSearchResponseDTO> getAggregation(String keyword, Map<String, String> params) {
+        NativeQueryBuilder queryBuilder = this.extractQuery(keyword, PageRequest.of(0, 10), params);
+        NativeQuery query = queryBuilder
+                .withAggregation("WARD", Aggregation.of(a -> a
+                        .terms(t -> t
+                                .field("vehicleDetail.ward.keyword")
+                                .size(20)
+                        )
+                )).build();
+
+        SearchHits<PostDocument> searchHits = elasticsearchOperations.search(query, PostDocument.class);
+
+        List<org.springframework.data.elasticsearch.client.elc.Aggregation> aggregations = new ArrayList<>();
+
+        if (searchHits.hasAggregations()) {
+            ((List<ElasticsearchAggregation>) searchHits.getAggregations().aggregations())
+                    .forEach(elsAgg -> aggregations.add(elsAgg.aggregation()));
+        }
+
+        List<FilterSearchResponseDTO> responses = new ArrayList<>();
+
+        for (org.springframework.data.elasticsearch.client.elc.Aggregation agg : aggregations) {
+            String aggName = agg.getName();
+            Aggregate innerAgg = agg.getAggregate();
+            List<FilterSearchResponseDTO.FilterSearchItem> filterResponseItems = new ArrayList<>();
+
+            switch (innerAgg._kind()) {
+                case Sterms:
+                    StringTermsAggregate stringTermsAgg = (StringTermsAggregate) innerAgg._get();
+                    List<StringTermsBucket> stringBuckets = (List<StringTermsBucket>) stringTermsAgg.buckets()._get();
+                    for (StringTermsBucket bucket : stringBuckets) {
+                        FilterSearchResponseDTO.FilterSearchItem item = FilterSearchResponseDTO.FilterSearchItem
+                                .builder()
+                                .label(bucket.key().stringValue())
+                                .value(bucket.key().stringValue())
+                                .count(bucket.docCount())
+                                .build();
+                        if (!bucket.aggregations().isEmpty()) {
+                            StringTermsAggregate nameAgg = (StringTermsAggregate) bucket.aggregations().get("name")._get();
+                            item.setLabel(nameAgg.buckets().array().get(0).key().stringValue());
+                        }
+                        filterResponseItems.add(item);
+                    }
+                    break;
+                case Range:
+                    List<RangeBucket> rangeBuckets = (List<RangeBucket>) innerAgg.range().buckets()._get();
+                    for (RangeBucket bucket : rangeBuckets) {
+                        filterResponseItems.add(FilterSearchResponseDTO.FilterSearchItem
+                                .builder()
+                                .label(bucket.key())
+                                .value(bucket.key())
+                                .count(bucket.docCount())
+                                .build());
+                    }
+                    break;
+                default:
+                    break;
+            }
+            responses.add(FilterSearchResponseDTO
+                    .builder()
+                    .label(aggName)
+                    .value(FilterUtils.AGGS_VALUE.get(aggName))
+                    .items(filterResponseItems)
+                    .build());
+        }
+
+        return responses;
     }
 
     @Override
@@ -84,6 +154,7 @@ public class SearchServiceImpl implements SearchService {
         String category = isValidSearchField(params, FilterUtils.CATEGORY) ? params.get(FilterUtils.CATEGORY) : null;
         String province = isValidSearchField(params, FilterUtils.PROVINCE) ? params.get(FilterUtils.PROVINCE) : null;
         String ward = isValidSearchField(params, FilterUtils.WARD) ? params.get(FilterUtils.WARD) : null;
+        String type = isValidSearchField(params, FilterUtils.TYPE) ? params.get(FilterUtils.TYPE) : null;
         Integer minYear = isValidSearchField(params, FilterUtils.MIN_YEAR) ? Integer.parseInt(params.get(FilterUtils.MIN_YEAR)) : null;
         Integer maxYear = isValidSearchField(params, FilterUtils.MAX_YEAR) ? Integer.parseInt(params.get(FilterUtils.MAX_YEAR)) : null;
         Double minPrice = isValidSearchField(params, FilterUtils.MIN_PRICE) ? Double.parseDouble(params.get(FilterUtils.MIN_PRICE)) : null;
@@ -105,11 +176,10 @@ public class SearchServiceImpl implements SearchService {
                     .should(QueryBuilders.multiMatch(m -> m
                             .fields("title",
                                     "description",
-                                    "vehicleDocument.province",
-                                    "vehicleDocument.ward",
-                                    "vehicleDocument.address",
-                                    "vehicleDocument.categoryDocument.name",
-                                    "sectionDocument.contentDocumentList.name")
+                                    "vehicleDetail.province",
+                                    "vehicleDetail.ward",
+                                    "vehicleDetail.address",
+                                    "vehicleDocument.categoryDocument.name")
                             .query(keyword)
                             .fuzziness("AUTO")
                             .boost(1.2f)))
@@ -129,7 +199,9 @@ public class SearchServiceImpl implements SearchService {
         queryBuilder.withPageable(pageable);
 
         queryBuilder.withFilter(f -> f.bool(b -> {
-            extractedTermsFilter(category, "category", b);
+            extractedTermsFilter(province, "vehicleDetail.province.keyword", b);
+            extractedTermsFilter(type, "type.keyword", b);
+            extractedTermsFilter(category, "vehicleDetail.category.id.keyword", b);
             extractedRange(minPrice, maxPrice, "price", b);
             extractedRange(minYear, maxYear, "manufactureYear", b);
             return b;
@@ -187,7 +259,7 @@ public class SearchServiceImpl implements SearchService {
                     }));
                 }
             }
-            return new  Query.Builder().bool(orBool.build());
+            return new Query.Builder().bool(orBool.build());
         });
     }
 

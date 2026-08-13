@@ -6,7 +6,7 @@ import java.util.Map;
 public class FilterUtils {
     public static final String DEFAULT_BANNER = "https://res.cloudinary.com/dlwjpzshh/image/upload/v1746793532/jjvsildtdhpto8nr13pm.png";
     public static final String PADDING_OFFSET = "0";
-    public static final String CATEGORY = "categories";
+    public static final String CATEGORY = "category";
     public static final String PROPERTIES = "properties";
     public static final String MIN_PRICE = "minPrice";
     public static final String MAX_PRICE = "maxPrice";
@@ -14,8 +14,9 @@ public class FilterUtils {
     public static final String MAX_YEAR = "maxYear";
     public static final String PROVINCE = "province";
     public static final String WARD = "ward";
+    public static final String TYPE = "type";
     public static final Map<String, String> AGGS_VALUE = new HashMap<>() {{
-        put("Rating", "rating");
+        put("WARD", "Phường");
         put("Duration(Hours)", "duration");
         put("Level", "level");
         put("Category", "category");

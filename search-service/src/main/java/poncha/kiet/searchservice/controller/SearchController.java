@@ -36,6 +36,21 @@ public class SearchController {
                 .build());
     }
 
+    @GetMapping("/filters")
+    public ResponseEntity<Response<?>> getFilters(
+            @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") String size,
+            @RequestParam Map<String, String> params
+    ) {
+        return ResponseEntity.ok(Response.builder()
+                .success(true)
+                .message("Get filters successfully")
+                .data(searchService.getAggregation(keyword, params))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
     @GetMapping("/async")
     public ResponseEntity<Response<?>> asyncData() {
         searchService.migrateData();
