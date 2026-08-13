@@ -24,13 +24,13 @@ public class VehicleDocument {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
     private LocalDateTime createdAt;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String province;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String ward;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String address;
 
     @Field(type = FieldType.Integer)
@@ -39,7 +39,7 @@ public class VehicleDocument {
     @Field(type = FieldType.Double)
     private double price;
 
-    @Field(type = FieldType.Object)
+    @Field(type = FieldType.Flattened)
     private Map<String, String> properties;
 
     @Field(type = FieldType.Text)
