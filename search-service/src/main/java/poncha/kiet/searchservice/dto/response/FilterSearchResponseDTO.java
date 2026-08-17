@@ -22,7 +22,7 @@ public class FilterSearchResponseDTO {
     @Data
     public static class FilterSearchItem {
         public String label;
-        public String value;
+        public Object value;
         public Long count;
     }
 }
