@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @GrpcService
 @RequiredArgsConstructor
-public class UserServiceGrpcImpl extends UserToVehicleServiceGrpc.UserToVehicleServiceImplBase {
+public class UserToVehicleGrpcImpl extends UserToVehicleServiceGrpc.UserToVehicleServiceImplBase {
     private final UserRepository userRepository;
 
     @Override

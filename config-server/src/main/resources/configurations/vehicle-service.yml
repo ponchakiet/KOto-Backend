@@ -23,7 +23,7 @@ grpc:
       address: "static://localhost:9091"
       negotiationType: PLAINTEXT
     postServiceGrpc:
-      address: "static://localhost:9094"
+      address: "discovery:///post-service"
       negotiationType: PLAINTEXT
     uploadServiceGrpc:
       address: "static://localhost:9092"

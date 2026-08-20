@@ -11,12 +11,10 @@ import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.entity.*;
 import poncha.kiet.postservice.exception.ResourceNotFoundException;
 import poncha.kiet.postservice.exception.UnauthorizedException;
-import poncha.kiet.postservice.grpc.Content;
-import poncha.kiet.postservice.grpc.VehicleRequest;
-import poncha.kiet.postservice.grpc.VehicleResponse;
-import poncha.kiet.postservice.grpc.VehicleToPostServiceGrpc;
+import poncha.kiet.postservice.grpc.*;
 import poncha.kiet.postservice.mapper.CommentMapper;
 import poncha.kiet.postservice.mapper.PostMapper;
+import poncha.kiet.postservice.mapper.UserMapper;
 import poncha.kiet.postservice.mapper.VehicleMapper;
 import poncha.kiet.postservice.projection.PostHistory;
 import poncha.kiet.postservice.projection.PostOverview;
@@ -33,8 +31,11 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
+    private final UserMapper userMapper;
     @GrpcClient("vehicleServiceGrpc")
     private VehicleToPostServiceGrpc.VehicleToPostServiceBlockingStub vehicleServiceBlockingStub;
+    @GrpcClient("userServiceGrpc")
+    private UserToPostServiceGrpc.UserToPostServiceBlockingStub userServiceBlockingStub;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final VehicleMapper vehicleMapper;
@@ -43,13 +44,14 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void createPost(PostRequestDTO request) {
+    public void createPost(PostRequestDTO request, String userId) {
         vehicleServiceBlockingStub.checkExisted(VehicleRequest.newBuilder()
                 .setId(request.getVehicleId())
-                .setUserId(request.getUserId())
+                .setUserId(userId)
                 .build());
 
         Post post = postMapper.toEntity(request);
+        post.setUserId(userId);
         post.setStatus(PostStatus.WAITING_PAYMENT);
 
         postRepository.save(post);
@@ -127,8 +129,13 @@ public class PostServiceImpl implements PostService {
                 .setId(post.getVehicleId())
                 .build());
 
+        UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub.getUserInfo(UserInfoRequest.newBuilder()
+                .setId(post.getUserId())
+                .build());
+
         PostResponseDTO postResponseDTO = postMapper.toDto(post);
         postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
+        postResponseDTO.setUserInfo(userMapper.toResponseDTO(userPostInfoResponse));
         return postResponseDTO;
     }
 
@@ -148,8 +155,14 @@ public class PostServiceImpl implements PostService {
                     VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(VehicleRequest.newBuilder()
                             .setId(p.getVehicleId())
                             .build());
+
+                    UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub.getUserInfo(UserInfoRequest.newBuilder()
+                            .setId(p.getUserId())
+                            .build());
+
                     PostResponseDTO postResponseDTO = postMapper.toDto(p);
                     postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
+                    postResponseDTO.setUserInfo(userMapper.toResponseDTO(userPostInfoResponse));
                     return postResponseDTO;
                 });
 
@@ -173,7 +186,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable) {
-        Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, kw, PostStatus.valueOf(status));
+        Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, userId, kw, PostStatus.valueOf(status));
 
         Page<PostOverviewResponseDTO> data = postOverviews
                 .map(p -> {

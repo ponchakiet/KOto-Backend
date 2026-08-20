@@ -7,10 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
-import poncha.kiet.userservice.dto.response.FollowerResponse;
-import poncha.kiet.userservice.dto.response.PageResponse;
-import poncha.kiet.userservice.dto.response.Response;
-import poncha.kiet.userservice.dto.response.UserResponseDTO;
+import poncha.kiet.userservice.dto.response.*;
 import poncha.kiet.userservice.service.UserService;
 
 import java.time.LocalDateTime;
@@ -41,6 +38,16 @@ public class UserController {
                 .success(true)
                 .message("Get user successfully")
                 .data(userService.findById(userId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<Response<UserProfileResponseDTO>> getProfileUser(@RequestHeader("X-UserId") String id) {
+        return ResponseEntity.ok(Response.<UserProfileResponseDTO>builder()
+                .success(true)
+                .message("Get profile user successfully")
+                .data(userService.findProfileUser(id))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

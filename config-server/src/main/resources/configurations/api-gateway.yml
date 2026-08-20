@@ -31,13 +31,15 @@ spring:
               uri: lb:http://SEARCH-SERVICE
               predicates:
                 - Path=/search-service/api/v1/**
+  main:
+    web-application-type: reactive
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.server: DEBUG
     reactor.netty: INFO
 server:
-  port: 8080
+  port: 9292
 management:
   endpoints:
     web:

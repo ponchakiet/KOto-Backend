@@ -31,9 +31,10 @@ public interface PostRepository extends JpaRepository<Post, String> {
     @Query("""
             from Post p
             WHERE p.title like concat('%',:kw,'%')
-            AND p.status = :status 
+            AND p.status = :status
+            AND p.userId = :userId
             """)
-    Page<PostOverview> findAllByStatus(Pageable pageable, @Param("kw") String kw, @Param("status") PostStatus status);
+    Page<PostOverview> findAllByStatus(Pageable pageable, @Param("userId") String userId, @Param("kw") String kw, @Param("status") PostStatus status);
 
     @Query(value = """
             SELECT s.status AS status, COUNT(p.id) AS count

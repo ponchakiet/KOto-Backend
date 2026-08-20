@@ -8,9 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import poncha.kiet.userservice.entity.User;
+import poncha.kiet.userservice.projection.UserProfile;
+
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
+    @Query("FROM User u where u.id=:userId")
+    Optional<UserProfile> findProfileUser(@Param("userId") String userId);
+
+    <T> Optional<T> findById(String id, Class<T> type);
+
     boolean findByUsername(String username);
 
     boolean findByEmail(String email);

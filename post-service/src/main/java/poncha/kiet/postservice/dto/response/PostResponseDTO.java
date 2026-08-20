@@ -22,4 +22,5 @@ public class PostResponseDTO {
     private String userId;
     private String status;
     private VehicleDetailResponseDTO vehicleDetail;
+    private UserPostInfoResponseDTO userInfo;
 }

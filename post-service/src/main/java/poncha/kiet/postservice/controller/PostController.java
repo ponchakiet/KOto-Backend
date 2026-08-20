@@ -45,14 +45,14 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/public/posts/status")
+    @GetMapping("/posts/status")
     public ResponseEntity<Response<PageResponse<PostOverviewResponseDTO>>> getPostsByStatus(
+            @RequestHeader("X-UserId") String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String status,
             @RequestParam(defaultValue = "") String kw
     ) {
-        String userId = "ssss";
         return ResponseEntity.ok(Response.<PageResponse<PostOverviewResponseDTO>>builder()
                 .success(true)
                 .message("Get posts by status successfully")
@@ -62,9 +62,9 @@ public class PostController {
     }
 
     @PutMapping("/posts/{postId}")
-    public ResponseEntity<Response<Map<String, String>>> updatePost(@PathVariable("postId") String postId,
+    public ResponseEntity<Response<Map<String, String>>> updatePost(@RequestHeader("X-UserId") String userId,
+                                                                    @PathVariable("postId") String postId,
                                                                     @RequestBody PostRequestDTO postRequestDTO) throws AccessDeniedException {
-        String userId = "ssss";
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Update post successfully")
@@ -74,8 +74,9 @@ public class PostController {
     }
 
     @DeleteMapping("/posts/{postId}")
-    public ResponseEntity<Response<Void>> deletePost(@PathVariable("postId") String postId) {
-        String userId = "ssss";
+    public ResponseEntity<Response<Void>> deletePost(
+            @RequestHeader("X-UserId") String userId,
+            @PathVariable("postId") String postId) {
         postService.inActivePost(userId, postId);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
@@ -84,13 +85,13 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/public/posts/history/{vehicleId}")
+    @GetMapping("/posts/history/{vehicleId}")
     public ResponseEntity<Response<PageResponse<PostHistoryResponseDTO>>> getHistoryPost(
+            @RequestHeader("X-UserId") String userId,
             @PathVariable("vehicleId") String vehicleId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        String userId = "ssss";
         return ResponseEntity.ok(Response.<PageResponse<PostHistoryResponseDTO>>builder()
                 .success(true)
                 .message("Get history post successfully")
@@ -99,9 +100,10 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/public/posts/count-status")
-    public ResponseEntity<Response<List<StatusCountResponseDTO>>> getSummaryPostStatus() {
-        String userId = "ssss";
+    @GetMapping("/posts/count-status")
+    public ResponseEntity<Response<List<StatusCountResponseDTO>>> getSummaryPostStatus(
+            @RequestHeader("X-UserId") String userId
+    ) {
         return ResponseEntity.ok(Response.<List<StatusCountResponseDTO>>builder()
                 .success(true)
                 .message("Get summary post status successfully")
@@ -111,8 +113,10 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<Response<Void>> createPost(@RequestBody PostRequestDTO request) {
-        postService.createPost(request);
+    public ResponseEntity<Response<Void>> createPost(
+            @RequestHeader("X-UserId") String userId,
+            @RequestBody PostRequestDTO request) {
+        postService.createPost(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
                 .success(true)
                 .message("Create post successfully")

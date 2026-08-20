@@ -13,7 +13,6 @@ public class PostRequestDTO {
     private String title;
     private String description;
     private String vehicleId;
-    private String userId;
     private double price;
     private String type;
 }

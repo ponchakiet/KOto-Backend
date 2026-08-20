@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.FollowerResponse;
+import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
 import poncha.kiet.userservice.dto.response.UserResponseDTO;
 import poncha.kiet.userservice.entity.User;
 import poncha.kiet.userservice.exception.DuplicateResourceException;
@@ -19,6 +20,7 @@ import poncha.kiet.userservice.grpc.FileChunk;
 import poncha.kiet.userservice.grpc.UploadResponse;
 import poncha.kiet.userservice.grpc.UploadServiceGrpc;
 import poncha.kiet.userservice.mapper.UserMapper;
+import poncha.kiet.userservice.projection.UserProfile;
 import poncha.kiet.userservice.repository.UserRepository;
 import poncha.kiet.userservice.service.UserService;
 
@@ -42,6 +44,14 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponseDTO> findAll(Pageable pageable) {
         Page<User> userPage = userRepository.findAll(pageable);
         return userPage.map(userMapper::toDto);
+    }
+
+    @Override
+    public UserProfileResponseDTO findProfileUser(String id) {
+        UserProfile user = userRepository.findProfileUser(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found user"));
+
+        return userMapper.toResponseDto(user);
     }
 
     @Override

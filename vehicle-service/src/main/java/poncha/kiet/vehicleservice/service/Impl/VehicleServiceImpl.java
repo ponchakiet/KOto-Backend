@@ -212,10 +212,6 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void updateVehicle(VehicleRequestDTO request, String userId) throws AccessDeniedException {
-        UserResponse userResponse = serviceBlockingStub.getUserById(UserRequest.newBuilder()
-                .setId(userId)
-                .build());
-
         Vehicle vehicle = vehicleRepository.findById(request.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Not found vehicle"));
 

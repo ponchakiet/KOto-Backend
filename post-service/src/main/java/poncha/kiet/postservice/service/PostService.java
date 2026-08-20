@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface PostService {
-    void createPost(PostRequestDTO request);
+    void createPost(PostRequestDTO request, String userId);
 
     Map<String, String> updatePost(String postId, String userId, PostRequestDTO updateRequest) throws AccessDeniedException;
 

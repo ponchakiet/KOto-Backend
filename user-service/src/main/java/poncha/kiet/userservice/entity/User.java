@@ -21,8 +21,6 @@ public class User {
     private String id;
     @Column(name = "username", unique = true, nullable = false)
     private String username;
-    @Column(name = "password", nullable = false)
-    private String password;
     @Column(name = "email", unique = true, nullable = false)
     private String email;
     @Column(name = "first_name", nullable = false)
@@ -39,8 +37,8 @@ public class User {
     private boolean isActive;
     @Column(name = "sex")
     private boolean sex;
-    @Column(name = "phone")
-    private String phone;
+    @Column(name = "phone_number")
+    private String phoneNumber;
     @Column(name = "avt_url")
     private String avtUrl;
     @ManyToOne
@@ -57,12 +55,4 @@ public class User {
 
     @ManyToMany(mappedBy = "followers")
     private Set<User> following;
-
-    @ManyToMany
-    @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
 }

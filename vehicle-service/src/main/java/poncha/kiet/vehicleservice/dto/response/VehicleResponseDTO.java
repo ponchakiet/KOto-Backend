@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
 import poncha.kiet.vehicleservice.entity.Content;
 
@@ -30,4 +31,11 @@ public class VehicleResponseDTO {
     private String userId;
     private List<Content> contents;
     private CategoryResponseDTO category;
+
+    public static class Media {
+        private String id;
+        private String url;
+        private String name;
+        private LocalDateTime createdAt;
+    }
 }
