@@ -22,8 +22,8 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/public/posts/{postId}")
-    public ResponseEntity<Response<PostResponseDTO>> getPost(@PathVariable("postId") String postId) {
-        return ResponseEntity.ok(Response.<PostResponseDTO>builder()
+    public ResponseEntity<Response<PostDetailResponseDTO>> getPostById(@PathVariable("postId") String postId) {
+        return ResponseEntity.ok(Response.<PostDetailResponseDTO>builder()
                 .success(true)
                 .message("Get post successfully")
                 .data(postService.findPostById(postId))
@@ -148,7 +148,7 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/posts/{postId}/comments")
+    @GetMapping("/public/posts/{postId}/comments")
     public ResponseEntity<Response<PageResponse<CommentResponseDTO>>> getComments(
             @PathVariable("postId") String postId,
             @RequestParam(defaultValue = "0") int page,
@@ -163,12 +163,13 @@ public class PostController {
 
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<Response<Map<String, String>>> createComment(
+            @RequestHeader("X-UserId") String userId,
             @PathVariable("postId") String postId,
             @RequestBody Map<String, String> params) {
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Get comments successfully")
-                .data(postService.createComment(postId, params))
+                .data(postService.createComment(postId, userId,params))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

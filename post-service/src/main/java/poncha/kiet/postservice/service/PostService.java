@@ -22,7 +22,7 @@ public interface PostService {
 
     void unlikePost(String userId, String postId);
 
-    PostResponseDTO findPostById(String postId);
+    PostDetailResponseDTO findPostById(String postId);
 
     Page<PostHistoryResponseDTO> findHistoryPost(String vehicleId, String userId, Pageable pageable);
 
@@ -32,7 +32,7 @@ public interface PostService {
 
     Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable);
 
-    Map<String, String> createComment(String postId, Map<String, String> content);
+    Map<String, String> createComment(String postId, String userId, Map<String, String> content);
 
     void deleteComment(String postId, Map<String, String> content);
 

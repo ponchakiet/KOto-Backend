@@ -12,7 +12,6 @@ import poncha.kiet.postservice.entity.*;
 import poncha.kiet.postservice.exception.ResourceNotFoundException;
 import poncha.kiet.postservice.exception.UnauthorizedException;
 import poncha.kiet.postservice.grpc.*;
-import poncha.kiet.postservice.mapper.CommentMapper;
 import poncha.kiet.postservice.mapper.PostMapper;
 import poncha.kiet.postservice.mapper.UserMapper;
 import poncha.kiet.postservice.mapper.VehicleMapper;
@@ -40,7 +39,6 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final VehicleMapper vehicleMapper;
     private final CommentRepository commentRepository;
-    private final CommentMapper commentMapper;
 
     @Override
     @Transactional
@@ -121,22 +119,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDTO findPostById(String postId) {
+    public PostDetailResponseDTO findPostById(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found post with id: " + postId));
 
-        VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(VehicleRequest.newBuilder()
-                .setId(post.getVehicleId())
-                .build());
-
-        UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub.getUserInfo(UserInfoRequest.newBuilder()
-                .setId(post.getUserId())
-                .build());
-
-        PostResponseDTO postResponseDTO = postMapper.toDto(post);
-        postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
-        postResponseDTO.setUserInfo(userMapper.toResponseDTO(userPostInfoResponse));
-        return postResponseDTO;
+        return postMapper.toDetailResponse(post);
     }
 
     @Override
@@ -206,12 +193,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Map<String, String> createComment(String postId, Map<String, String> content) {
+    public Map<String, String> createComment(String postId, String userId, Map<String, String> content) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
 
         Comment comment = Comment.builder()
-                .userId(content.get("userId"))
+                .userId(userId)
                 .createdAt(LocalDateTime.now())
                 .content(content.get("content"))
                 .build();
@@ -221,7 +208,9 @@ public class PostServiceImpl implements PostService {
 
         comment = commentRepository.save(comment);
 
-        return Map.of("id", comment.getId());
+        return Map.of("id", comment.getId(),
+                "content", comment.getContent(),
+                "createdAt", comment.getCreatedAt().toString());
 
     }
 
@@ -245,7 +234,31 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<CommentResponseDTO> findCommentsByPostId(String postId, Pageable pageable) {
         Page<Comment> comments = commentRepository.findAllByPostId(postId, pageable);
-        return comments.map(commentMapper::toDto);
+
+        Page<CommentResponseDTO> response = comments
+                .map(c -> {
+                    CommentResponseDTO commentResponseDTO = CommentResponseDTO.builder()
+                            .id(c.getId())
+                            .content(c.getContent())
+                            .createdAt(c.getCreatedAt())
+                            .build();
+
+                    UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub
+                            .getUserInfo(UserInfoRequest.newBuilder()
+                                    .setId(c.getUserId())
+                                    .build());
+
+                    commentResponseDTO.setUserInfo(CommentResponseDTO.UserInfo.builder()
+                            .firstName(userPostInfoResponse.getFirstName())
+                            .lastName(userPostInfoResponse.getLastName())
+                            .avtUrl(userPostInfoResponse.getAvtUrl())
+                            .id(userPostInfoResponse.getId())
+                            .build());
+
+                    return commentResponseDTO;
+                });
+
+        return response;
     }
 
     @Override

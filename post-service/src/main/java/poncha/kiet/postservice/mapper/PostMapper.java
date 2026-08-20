@@ -1,25 +1,27 @@
 package poncha.kiet.postservice.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
+import poncha.kiet.postservice.dto.response.PostDetailResponseDTO;
 import poncha.kiet.postservice.dto.response.PostHistoryResponseDTO;
 import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
 import poncha.kiet.postservice.dto.response.PostResponseDTO;
 import poncha.kiet.postservice.entity.Post;
 import poncha.kiet.postservice.grpc.PostDetailResponse;
+import poncha.kiet.postservice.mapper.decorator.PostMapperDecorator;
 import poncha.kiet.postservice.projection.PostHistory;
 import poncha.kiet.postservice.projection.PostOverview;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {VehicleMapper.class})
+@DecoratedWith(PostMapperDecorator.class)
 public interface PostMapper {
     Post toEntity(PostRequestDTO request);
 
     void update(PostRequestDTO request, @MappingTarget Post post);
+
+    PostDetailResponseDTO toDetailResponse(Post post);
 
     PostOverviewResponseDTO toOverview(PostOverview postOverview);
 
