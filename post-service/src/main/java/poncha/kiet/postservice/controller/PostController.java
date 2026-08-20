@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
 
-    @GetMapping("/{postId}")
+    @GetMapping("/public/posts/{postId}")
     public ResponseEntity<Response<PostResponseDTO>> getPost(@PathVariable("postId") String postId) {
         return ResponseEntity.ok(Response.<PostResponseDTO>builder()
                 .success(true)
@@ -31,7 +31,7 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping
+    @GetMapping("/public/posts")
     public ResponseEntity<Response<PageResponse<PostResponseDTO>>> getPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -45,7 +45,7 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/status")
+    @GetMapping("/public/posts/status")
     public ResponseEntity<Response<PageResponse<PostOverviewResponseDTO>>> getPostsByStatus(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -61,7 +61,7 @@ public class PostController {
                 .build());
     }
 
-    @PutMapping("/{postId}")
+    @PutMapping("/posts/{postId}")
     public ResponseEntity<Response<Map<String, String>>> updatePost(@PathVariable("postId") String postId,
                                                                     @RequestBody PostRequestDTO postRequestDTO) throws AccessDeniedException {
         String userId = "ssss";
@@ -73,7 +73,7 @@ public class PostController {
                 .build());
     }
 
-    @DeleteMapping("/{postId}")
+    @DeleteMapping("/posts/{postId}")
     public ResponseEntity<Response<Void>> deletePost(@PathVariable("postId") String postId) {
         String userId = "ssss";
         postService.inActivePost(userId, postId);
@@ -84,7 +84,7 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/history/{vehicleId}")
+    @GetMapping("/public/posts/history/{vehicleId}")
     public ResponseEntity<Response<PageResponse<PostHistoryResponseDTO>>> getHistoryPost(
             @PathVariable("vehicleId") String vehicleId,
             @RequestParam(defaultValue = "0") int page,
@@ -99,7 +99,7 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/count-status")
+    @GetMapping("/public/posts/count-status")
     public ResponseEntity<Response<List<StatusCountResponseDTO>>> getSummaryPostStatus() {
         String userId = "ssss";
         return ResponseEntity.ok(Response.<List<StatusCountResponseDTO>>builder()
@@ -110,7 +110,7 @@ public class PostController {
                 .build());
     }
 
-    @PostMapping
+    @PostMapping("/posts")
     public ResponseEntity<Response<Void>> createPost(@RequestBody PostRequestDTO request) {
         postService.createPost(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
@@ -120,7 +120,7 @@ public class PostController {
                 .build());
     }
 
-    @PostMapping("/{postId}/like")
+    @PostMapping("/posts/{postId}/like")
     public ResponseEntity<Response<Void>> likePost(
             @PathVariable("postId") String postId,
             @RequestParam("userId") String userId) {
@@ -132,7 +132,7 @@ public class PostController {
                 .build());
     }
 
-    @DeleteMapping("/{postId}/unlike")
+    @DeleteMapping("/posts/{postId}/unlike")
     public ResponseEntity<Response<Void>> unlikePost(
             @PathVariable("postId") String postId,
             @RequestParam("userId") String userId) {
@@ -144,7 +144,7 @@ public class PostController {
                 .build());
     }
 
-    @GetMapping("/{postId}/comments")
+    @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Response<PageResponse<CommentResponseDTO>>> getComments(
             @PathVariable("postId") String postId,
             @RequestParam(defaultValue = "0") int page,
@@ -157,7 +157,7 @@ public class PostController {
                 .build());
     }
 
-    @PostMapping("/{postId}/comments")
+    @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<Response<Map<String, String>>> createComment(
             @PathVariable("postId") String postId,
             @RequestBody Map<String, String> params) {
@@ -169,7 +169,7 @@ public class PostController {
                 .build());
     }
 
-    @DeleteMapping("/{postId}/comments")
+    @DeleteMapping("/posts/{postId}/comments")
     public ResponseEntity<Response<Void>> deleteComment(
             @PathVariable("postId") String postId,
             @RequestBody Map<String, String> params) {

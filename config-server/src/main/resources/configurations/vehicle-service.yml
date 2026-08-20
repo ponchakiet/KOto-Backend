@@ -14,19 +14,16 @@ spring:
       enabled: true
   data:
     mongodb:
-      authentication-database: admin
-      database: koto_vehicle
-      username: admin
-      password: 123456
       host: localhost
       port: 27017
+      database: koto_vehicle
 grpc:
   client:
     userServiceGrpc:
       address: "static://localhost:9091"
       negotiationType: PLAINTEXT
     postServiceGrpc:
-      address: "discovery:///post-service"
+      address: "static://localhost:9094"
       negotiationType: PLAINTEXT
     uploadServiceGrpc:
       address: "static://localhost:9092"

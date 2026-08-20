@@ -13,11 +13,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DealerServiceImpl implements DealerService {
-    private final DealerRepository  dealerRepository;
+    private final DealerRepository dealerRepository;
     private final DealerMapper dealerMapper;
+
     @Override
     public void createDealer(DealerRequestDTO dealerRequestDTO) {
-        Dealer dealer =  dealerMapper.toEntity(dealerRequestDTO);
+        Dealer dealer = dealerMapper.toEntity(dealerRequestDTO);
         dealer.setId(UUID.randomUUID().toString());
         dealerRepository.save(dealer);
     }

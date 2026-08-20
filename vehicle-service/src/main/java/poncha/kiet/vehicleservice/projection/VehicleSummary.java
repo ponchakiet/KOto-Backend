@@ -14,9 +14,9 @@ public interface VehicleSummary {
 
     String getProvince();
 
-    double price();
+    double getPrice();
 
-    int manufactureYear();
+    int getManufactureYear();
 
     LocalDateTime getCreatedAt();
 

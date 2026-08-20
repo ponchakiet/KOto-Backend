@@ -20,11 +20,11 @@ spring:
       hibernate:
         format_sql: true
 
-  grpc:
-    client:
-      uploadServiceGrpc:
-        address: "static://localhost:9092"
-        negotiationType: PLAINTEXT
-    server:
-      port: 9091
-      enable-reflection: true
+grpc:
+  client:
+    uploadServiceGrpc:
+      address: "static://localhost:9092"
+      negotiationType: PLAINTEXT
+  server:
+    port: 9091
+    enable-reflection: true

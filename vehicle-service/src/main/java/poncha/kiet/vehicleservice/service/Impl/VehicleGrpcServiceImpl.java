@@ -80,12 +80,12 @@ public class VehicleGrpcServiceImpl extends VehicleToPostServiceGrpc.VehicleToPo
     @Override
     public void getVehicleDetail(VehicleRequest request, StreamObserver<VehicleResponse> responseObserver) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(request.getId());
-        if (!optionalVehicle.isPresent()) {
+        if (!optionalVehicle.isPresent())
             responseObserver.onError(
                     Status.NOT_FOUND
                             .withDescription("Vehicle not found with ID: " + request.getId())
                             .asRuntimeException());
-        }
+
         Vehicle vehicle = optionalVehicle.get();
 
         VehicleResponse response = vehicleMapper.toResponse(vehicle);

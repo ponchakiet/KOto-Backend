@@ -21,7 +21,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category create(Map<String, String> category) {
-        if(!category.containsKey("name"))
+        if (!category.containsKey("name"))
             throw new BadRequestException("Missing name category");
 
         Category entity = Category.builder()

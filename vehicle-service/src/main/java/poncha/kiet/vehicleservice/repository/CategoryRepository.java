@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import poncha.kiet.vehicleservice.entity.Category;
 
 @Repository
-public interface CategoryRepository extends MongoRepository<Category,String> {
+public interface CategoryRepository extends MongoRepository<Category, String> {
 }

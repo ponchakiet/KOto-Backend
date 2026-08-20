@@ -23,7 +23,7 @@ spring:
 grpc:
   client:
     vehicleServiceGrpc:
-      address: "discovery:///vehicle-service"
+      address: "static://localhost:9093"
       negotiationType: PLAINTEXT
   server:
     port: 9094

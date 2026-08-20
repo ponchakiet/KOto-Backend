@@ -31,7 +31,7 @@ public class VehicleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        String userId = "ssss";
+        String userId = "user-1";
         return ResponseEntity.ok(Response.<PageResponse<VehicleSummaryResponseDTO>>builder()
                 .success(true)
                 .message("Get vehicles successfully")
@@ -42,7 +42,7 @@ public class VehicleController {
 
     @GetMapping("/draft")
     public ResponseEntity<Response<List<VehicleResponseDTO>>> getVehiclesDraft() {
-        String userId = "ssss";
+        String userId = "user-1";
         String type = String.valueOf(VehicleType.DRAFT);
 
         return ResponseEntity.ok(Response.<List<VehicleResponseDTO>>builder()
@@ -77,7 +77,7 @@ public class VehicleController {
 
     @PostMapping
     public ResponseEntity<Response<Void>> createVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) {
-        String userId = "ssss";
+        String userId = "user-1";
         vehicleService.createVehicle(vehicleRequestDTO, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
                 .success(true)
@@ -88,7 +88,7 @@ public class VehicleController {
 
     @PutMapping
     public ResponseEntity<Response<Void>> updateVehicle(@RequestBody VehicleRequestDTO vehicleRequestDTO) throws AccessDeniedException {
-        String userId = "ssss";
+        String userId = "user-1";
         vehicleService.updateVehicle(vehicleRequestDTO, userId);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
@@ -99,7 +99,7 @@ public class VehicleController {
 
     @DeleteMapping("/{vehicleId}")
     public ResponseEntity<Response<Map<String, String>>> deleteVehicle(@PathVariable("vehicleId") String vehicleId) throws AccessDeniedException {
-        String userId = "ssss";
+        String userId = "user-1";
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Delete vehicle successfully")
@@ -113,7 +113,7 @@ public class VehicleController {
             @RequestParam(value = "vehicleId", required = false) String id,
             @RequestParam(value = "file") MultipartFile file
     ) {
-        String userId = "ssss";
+        String userId = "user-1";
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Upload vehicle image successfully")

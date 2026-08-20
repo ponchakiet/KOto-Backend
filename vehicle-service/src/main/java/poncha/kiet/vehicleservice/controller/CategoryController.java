@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/categories")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
-    @PostMapping
+    @PostMapping("/categories")
     public ResponseEntity<Response<Category>> createCategory(@RequestBody Map<String, String> category) {
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Category>builder()
                 .success(true)
@@ -28,7 +28,7 @@ public class CategoryController {
                 .build());
     }
 
-    @GetMapping
+    @GetMapping("/public/categories")
     public ResponseEntity<Response<List<CategoryResponseDTO>>> getAllCategories() {
         return ResponseEntity.ok(Response.<List<CategoryResponseDTO>>builder()
                 .success(true)

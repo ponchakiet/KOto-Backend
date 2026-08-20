@@ -1,4 +1,9 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8443/realms/KOto
   cloud:
     gateway:
       actuator:
@@ -25,7 +30,7 @@ spring:
             - id: search-service
               uri: lb:http://SEARCH-SERVICE
               predicates:
-                -  Path=/search-service/api/v1/**
+                - Path=/search-service/api/v1/**
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
