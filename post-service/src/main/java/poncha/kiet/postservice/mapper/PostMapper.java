@@ -2,10 +2,7 @@ package poncha.kiet.postservice.mapper;
 
 import org.mapstruct.*;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
-import poncha.kiet.postservice.dto.response.PostDetailResponseDTO;
-import poncha.kiet.postservice.dto.response.PostHistoryResponseDTO;
-import poncha.kiet.postservice.dto.response.PostOverviewResponseDTO;
-import poncha.kiet.postservice.dto.response.PostResponseDTO;
+import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.entity.Post;
 import poncha.kiet.postservice.grpc.PostDetailResponse;
 import poncha.kiet.postservice.mapper.decorator.PostMapperDecorator;
@@ -24,6 +21,8 @@ public interface PostMapper {
     PostDetailResponseDTO toDetailResponse(Post post);
 
     PostOverviewResponseDTO toOverview(PostOverview postOverview);
+
+    PostWebmasterOverviewResponseDTO toWebmasterResponse(PostOverview postOverview);
 
     PostHistoryResponseDTO toHistory(PostHistory postHistory);
 

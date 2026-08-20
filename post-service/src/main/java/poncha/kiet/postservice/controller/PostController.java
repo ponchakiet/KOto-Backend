@@ -45,6 +45,22 @@ public class PostController {
                 .build());
     }
 
+    @GetMapping("/posts/webmaster")
+    public ResponseEntity<Response<PageResponse<PostWebmasterOverviewResponseDTO>>> getPostsByWebmaster(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "createdAt") String orderBy,
+            @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "kw", defaultValue = "") String keyword) {
+        return ResponseEntity.ok(Response.<PageResponse<PostWebmasterOverviewResponseDTO>>builder()
+                .success(true)
+                .message("Get posts by webmaster successfully")
+                .data(PageResponse.build(postService.findAllByStatus(status, keyword, PageRequest.of(page, size, Sort.by(Sort.Direction.valueOf(orderDirection.toUpperCase()), orderBy)))))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
     @GetMapping("/posts/status")
     public ResponseEntity<Response<PageResponse<PostOverviewResponseDTO>>> getPostsByStatus(
             @RequestHeader("X-UserId") String userId,
@@ -124,6 +140,31 @@ public class PostController {
                 .build());
     }
 
+    @PostMapping("/posts/{postId}/accept")
+    public ResponseEntity<Response<Void>> acceptPost(
+            @RequestHeader("X-Roles") List<String> roles,
+            @PathVariable("postId") String postId) {
+        postService.acceptPost(roles, postId);
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Accept post successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @DeleteMapping("/posts/{postId}/reject")
+    public ResponseEntity<Response<Void>> rejectPost(
+            @RequestHeader("X-Roles") List<String> roles,
+            @PathVariable("postId") String postId) {
+        postService.rejectPost(roles, postId);
+        return ResponseEntity.ok(Response.<Void>builder()
+                .success(true)
+                .message("Delete post successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+
     @PostMapping("/posts/{postId}/like")
     public ResponseEntity<Response<Void>> likePost(
             @PathVariable("postId") String postId,
@@ -169,7 +210,7 @@ public class PostController {
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Get comments successfully")
-                .data(postService.createComment(postId, userId,params))
+                .data(postService.createComment(postId, userId, params))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

@@ -29,10 +29,10 @@ public interface PostRepository extends JpaRepository<Post, String> {
     Page<PostHistory> findAllByVehicleIdAndUserId(String vehicleId, String userId, Pageable pageable);
 
     @Query("""
-            from Post p
-            WHERE p.title like concat('%',:kw,'%')
-            AND p.status = :status
-            AND p.userId = :userId
+            FROM Post p
+            WHERE p.title LIKE CONCAT('%', :kw, '%')
+            AND (:status IS NULL OR p.status = :status)
+            AND (:userId IS NULL OR p.userId = :userId)
             """)
     Page<PostOverview> findAllByStatus(Pageable pageable, @Param("userId") String userId, @Param("kw") String kw, @Param("status") PostStatus status);
 

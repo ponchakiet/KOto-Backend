@@ -82,11 +82,23 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void acceptPost(String userId, String postId) {
+    public void rejectPost(List<String> roles, String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
+
+        if (roles == null || !roles.contains(UserRole.ROLE_WEBMASTER.name()))
+            throw new UnauthorizedException("Don't have permission for this resource");
+
+        post.setStatus(PostStatus.REJECT);
+        postRepository.save(post);
+    }
+
+    @Override
+    public void acceptPost(List<String> roles, String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
-        if (!post.getUserId().equals(userId))
+        if (roles == null || !roles.contains(UserRole.ROLE_WEBMASTER.name()))
             throw new UnauthorizedException("Don't have permission for this resource");
 
         post.setStatus(PostStatus.SHOW);
@@ -180,12 +192,33 @@ public class PostServiceImpl implements PostService {
                     PostOverviewResponseDTO postOverviewResponseDTO = postMapper.toOverview(p);
                     Content content = vehicleServiceBlockingStub.getPoster(
                             VehicleRequest.newBuilder()
-                                    .setUserId(userId)
+                                    .setUserId(p.getUserId())
                                     .setId(p.getVehicleId())
                                     .build()
                     );
                     postOverviewResponseDTO.setPosterUrl(content.getUrl());
                     return postOverviewResponseDTO;
+                });
+
+        return data;
+    }
+
+    @Override
+    public Page<PostWebmasterOverviewResponseDTO> findAllByStatus(String status, String kw, Pageable pageable) {
+        PostStatus postStatus = status != null ? PostStatus.valueOf(status) : null;
+        Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, null, kw, postStatus);
+        Page<PostWebmasterOverviewResponseDTO> data = postOverviews
+                .map(p -> {
+                    PostWebmasterOverviewResponseDTO dto = postMapper.toWebmasterResponse(p);
+
+                    UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub.getUserInfo(
+                            UserInfoRequest.newBuilder()
+                                    .setId(p.getUserId())
+                                    .build());
+
+                    dto.setUserInfo(userMapper.toResponseDTO(userPostInfoResponse));
+
+                    return dto;
                 });
 
         return data;

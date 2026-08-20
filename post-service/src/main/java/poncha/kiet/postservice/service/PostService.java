@@ -16,7 +16,10 @@ public interface PostService {
 
     void inActivePost(String userId, String postId);
 
-    void acceptPost(String userId, String postId);
+    void rejectPost(List<String> roles, String postId);
+
+    void acceptPost(List<String> roles, String postId);
+
 
     void likePost(String userId, String postId);
 
@@ -31,6 +34,8 @@ public interface PostService {
     List<PostResponseDTO> findAll();
 
     Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable);
+
+    Page<PostWebmasterOverviewResponseDTO> findAllByStatus(String status, String kw, Pageable pageable);
 
     Map<String, String> createComment(String postId, String userId, Map<String, String> content);
 
