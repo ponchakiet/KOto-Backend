@@ -17,5 +17,7 @@ public class UserUpdateDTO {
     private String lastName;
     private LocalDate dob;
     private boolean sex;
-    private String phone;
+    private String phoneNumber;
+    private String taxCode;
+    private String cid;
 }

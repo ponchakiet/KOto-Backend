@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import poncha.kiet.userservice.dto.request.UserSignUpRequestDTO;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.FollowerResponse;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
@@ -44,6 +45,24 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponseDTO> findAll(Pageable pageable) {
         Page<User> userPage = userRepository.findAll(pageable);
         return userPage.map(userMapper::toDto);
+    }
+
+    @Override
+    @Transactional
+    public UserSignUpRequestDTO createUser(UserSignUpRequestDTO request) {
+        User user = User.builder()
+                .id(request.getUserId())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .createdAt(LocalDateTime.now())
+                .email(request.getEmail())
+                .isActive(true)
+                .sex(true)
+                .username(request.getUsername())
+                .build();
+
+        userRepository.save(user);
+        return request;
     }
 
     @Override

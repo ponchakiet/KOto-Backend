@@ -14,6 +14,7 @@ public class VehicleSummaryResponseDTO {
     private String address;
     private String ward;
     private String province;
+    private boolean isAttachedPost;
     private double price;
     private int manufactureYear;
     private LocalDateTime createdAt;

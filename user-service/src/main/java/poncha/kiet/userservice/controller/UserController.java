@@ -1,14 +1,18 @@
 package poncha.kiet.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import poncha.kiet.userservice.dto.request.UserSignUpRequestDTO;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.*;
 import poncha.kiet.userservice.service.UserService;
+import poncha.kiet.userservice.service.impl.KeycloakService;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -18,6 +22,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final KeycloakService keycloakService;
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<Response<UserSignUpRequestDTO>> signUpUser(@RequestBody UserSignUpRequestDTO request) {
+        keycloakService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Response.<UserSignUpRequestDTO>builder()
+                .success(true)
+                .message("Sign up user successfully")
+                .data(userService.createUser(request))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
 
     @GetMapping
     public ResponseEntity<Response<PageResponse<UserResponseDTO>>> getAll(
@@ -33,7 +49,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Response<UserResponseDTO>> getUserById(@PathVariable String userId) {
+    public ResponseEntity<Response<UserResponseDTO>> getUserById(@RequestHeader("X-UserId") String userId) {
         return ResponseEntity.ok(Response.<UserResponseDTO>builder()
                 .success(true)
                 .message("Get user successfully")
@@ -54,7 +70,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     public ResponseEntity<Response<UserResponseDTO>> updateProfile(
-            @PathVariable("userId") String userId,
+            @RequestHeader("X-UserId") String userId,
             @RequestBody UserUpdateDTO request
     ) {
         return ResponseEntity.ok(Response.<UserResponseDTO>builder()
@@ -79,13 +95,13 @@ public class UserController {
 
     @PostMapping(value = "/{userId}/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response<Map<String, String>>> updateAvatar(
-            @PathVariable("userId") String id,
+            @RequestHeader("X-UserId") String userId,
             @RequestParam MultipartFile file
     ) {
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Update avatar successfully")
-                .data(userService.updateAvatar(id, file))
+                .data(userService.updateAvatar(userId, file))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

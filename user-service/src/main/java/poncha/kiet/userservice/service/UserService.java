@@ -3,6 +3,7 @@ package poncha.kiet.userservice.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+import poncha.kiet.userservice.dto.request.UserSignUpRequestDTO;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.FollowerResponse;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
@@ -12,6 +13,8 @@ import java.util.Map;
 
 public interface UserService {
     Page<UserResponseDTO> findAll(Pageable pageable);
+
+    UserSignUpRequestDTO createUser(UserSignUpRequestDTO request);
 
     UserProfileResponseDTO findProfileUser(String id);
 

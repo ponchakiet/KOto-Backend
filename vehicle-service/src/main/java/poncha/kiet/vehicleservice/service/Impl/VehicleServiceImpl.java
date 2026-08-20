@@ -78,7 +78,17 @@ public class VehicleServiceImpl implements VehicleService {
     public Page<VehicleSummaryResponseDTO> findAll(String userId, Pageable pageable) {
         Page<VehicleSummary> page = vehicleRepository.findAllByUserIdAndType(userId, VehicleType.PERSIST, pageable);
 
-        return page.map(vehicleMapper::toSummary);
+        Page<VehicleSummaryResponseDTO> data = page.map(a -> {
+            VehicleSummaryResponseDTO response = vehicleMapper.toSummary(a);
+            PostCheckAttachResponse isAttached = postServiceStub.checkAttachedPost(PostCheckAttachRequest.newBuilder()
+                    .setId(a.getId())
+                    .build());
+
+            response.setAttachedPost(isAttached.getIsAttached());
+            return response;
+        });
+
+        return data;
     }
 
     @Override
@@ -94,12 +104,12 @@ public class VehicleServiceImpl implements VehicleService {
                         .setId(vehicle.getId())
                         .build());
 
-        if(response.getIsAttached())
+        if (response.getIsAttached())
             throw new RuntimeException("Vehicle is showing");
 
         vehicle.setType(VehicleType.DELETE);
         vehicleRepository.save(vehicle);
-        
+
         return Map.of("id", vehicle.getId());
     }
 

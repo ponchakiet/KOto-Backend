@@ -2,6 +2,7 @@ package poncha.kiet.userservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,9 +15,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Builder
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id")
     private String id;
     @Column(name = "username", unique = true, nullable = false)
@@ -41,6 +42,10 @@ public class User {
     private String phoneNumber;
     @Column(name = "avt_url")
     private String avtUrl;
+    @Column(name = "tax_code")
+    private String taxCode;
+    @Column(name = "cid")
+    private String cid;
     @ManyToOne
     @JoinColumn(name = "subscription_plan_id")
     private SubscriptionPlan subscriptionPlan;

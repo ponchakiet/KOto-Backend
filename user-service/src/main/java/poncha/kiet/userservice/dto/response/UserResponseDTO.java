@@ -12,26 +12,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserResponseDTO {
     private String id;
-
     private String username;
-
     private String password;
-
     private String email;
-
     private String firstName;
-
     private String lastName;
-
     private LocalDate dob;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime lastAccess;
-
     private boolean isActive;
-
     private boolean sex;
-
+    private String phoneNumber;
+    private String taxCode;
+    private String cid;
     private String avtUrl;
 }
