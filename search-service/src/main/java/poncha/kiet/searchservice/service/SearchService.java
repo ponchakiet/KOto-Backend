@@ -12,6 +12,4 @@ public interface SearchService {
     Page<PostDocument> searchPost(String keyword, Pageable pageable, Map<String, String> params);
 
     List<FilterSearchResponseDTO> getAggregation(String keyword, Map<String, String> params);
-
-    void migrateData();
 }

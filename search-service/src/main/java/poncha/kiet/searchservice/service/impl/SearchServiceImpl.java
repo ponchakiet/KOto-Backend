@@ -9,7 +9,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +17,6 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
@@ -26,9 +24,6 @@ import poncha.kiet.searchservice.dto.response.FilterSearchResponseDTO;
 import poncha.kiet.searchservice.entity.PostDocument;
 import poncha.kiet.searchservice.entity.enums.PostStatus;
 import poncha.kiet.searchservice.entity.enums.PostType;
-import poncha.kiet.searchservice.grpc.Empty;
-import poncha.kiet.searchservice.grpc.PostDetailResponseList;
-import poncha.kiet.searchservice.grpc.PostToSearchServiceGrpc;
 import poncha.kiet.searchservice.mapper.PostMapper;
 import poncha.kiet.searchservice.service.SearchService;
 import poncha.kiet.searchservice.utils.FilterUtils;
@@ -48,8 +43,6 @@ public class SearchServiceImpl implements SearchService {
     private final ElasticsearchOperations elasticsearchOperations;
     private final ElasticsearchOperations elasticsearchRestTemplate;
     private final PostMapper postMapper;
-    @GrpcClient("postServiceGrpc")
-    private PostToSearchServiceGrpc.PostToSearchServiceBlockingStub postServiceBlockingStub;
 
     @Override
     public Page<PostDocument> searchPost(String keyword, Pageable pageable, Map<String, String> params) {
@@ -234,24 +227,6 @@ public class SearchServiceImpl implements SearchService {
                 List<StringTermsBucket> subBuckets = (List<StringTermsBucket>) stringTermsAgg.buckets()._get();
                 extractSubValue(item, subBuckets);
             }
-        }
-    }
-
-    @Override
-    public void migrateData() {
-        IndexOperations indexOps = elasticsearchOperations.indexOps(PostDocument.class);
-        if (!indexOps.exists()) {
-            indexOps.create();
-            indexOps.putMapping(indexOps.createMapping(PostDocument.class));
-            System.out.println("Index created: post_index");
-        }
-
-        PostDetailResponseList responses = postServiceBlockingStub.getAllPost(Empty.newBuilder().build());
-
-        for (var post : responses.getResponseList()) {
-            PostDocument postDocument = postMapper.toDocument(post);
-            elasticsearchRestTemplate.save(postDocument);
-            log.info("Create post - {}", post.getId());
         }
     }
 

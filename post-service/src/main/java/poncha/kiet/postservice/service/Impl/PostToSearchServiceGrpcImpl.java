@@ -1,14 +1,17 @@
 package poncha.kiet.postservice.service.Impl;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import net.devh.boot.grpc.server.service.GrpcService;
+import poncha.kiet.postservice.entity.Post;
 import poncha.kiet.postservice.grpc.*;
 import poncha.kiet.postservice.mapper.PostMapper;
 import poncha.kiet.postservice.repository.PostRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -17,6 +20,28 @@ public class PostToSearchServiceGrpcImpl extends PostToSearchServiceGrpc.PostToS
     private final PostMapper postMapper;
     @GrpcClient("vehicleServiceGrpc")
     private VehicleToPostServiceGrpc.VehicleToPostServiceBlockingStub vehicleServiceGrpc;
+
+    @Override
+    public void getPostById(PostDetailRequest request, StreamObserver<PostDetailResponse> responseObserver) {
+        Optional<Post> optionalPost = postRepository.findById(request.getId());
+        if (!optionalPost.isPresent()) {
+            responseObserver.onError(
+                    Status.NOT_FOUND
+                            .withDescription("Post not found with ID: " + request.getId())
+                            .asRuntimeException());
+        }
+
+        Post post = optionalPost.get();
+        VehicleResponse vehicleResponse = vehicleServiceGrpc.getVehicleDetail(VehicleRequest.newBuilder()
+                .setId(post.getVehicleId())
+                .build());
+
+        PostDetailResponse postDetailResponse = postMapper.toDetail(post).toBuilder()
+                .setVehicleDetail(vehicleResponse).build();
+
+        responseObserver.onNext(postDetailResponse);
+        responseObserver.onCompleted();
+    }
 
     @Override
     public void getAllPost(Empty request, StreamObserver<PostDetailResponseList> responseObserver) {

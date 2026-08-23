@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import poncha.kiet.searchservice.dto.response.PageResponse;
 import poncha.kiet.searchservice.dto.response.Response;
 import poncha.kiet.searchservice.entity.PostDocument;
+import poncha.kiet.searchservice.service.AsyncService;
 import poncha.kiet.searchservice.service.SearchService;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SearchController {
     private final SearchService searchService;
+    private final AsyncService asyncService;
 
     @GetMapping
     public ResponseEntity<Response<PageResponse<PostDocument>>> search(
@@ -53,7 +55,7 @@ public class SearchController {
 
     @GetMapping("/async")
     public ResponseEntity<Response<?>> asyncData() {
-        searchService.migrateData();
+        asyncService.migrateData();
         return ResponseEntity.ok(Response.builder()
                 .success(true)
                 .message("Async data successfully")
