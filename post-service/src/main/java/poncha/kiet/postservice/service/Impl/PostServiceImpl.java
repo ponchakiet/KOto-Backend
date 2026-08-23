@@ -1,5 +1,6 @@
 package poncha.kiet.postservice.service.Impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import poncha.kiet.postservice.projection.StatusCount;
 import poncha.kiet.postservice.repository.CommentRepository;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
+import poncha.kiet.postservice.utils.Helper;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -35,6 +37,8 @@ public class PostServiceImpl implements PostService {
     private VehicleToPostServiceGrpc.VehicleToPostServiceBlockingStub vehicleServiceBlockingStub;
     @GrpcClient("userServiceGrpc")
     private UserToPostServiceGrpc.UserToPostServiceBlockingStub userServiceBlockingStub;
+    @GrpcClient("paymentServiceGrpc")
+    private PaymentServiceGrpc.PaymentServiceBlockingStub paymentServiceBlockingStub;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final VehicleMapper vehicleMapper;
@@ -42,7 +46,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void createPost(PostRequestDTO request, String userId) {
+    public Map<String, String> createPost(PostRequestDTO request, String userId, HttpServletRequest httpServletRequest) {
         vehicleServiceBlockingStub.checkExisted(VehicleRequest.newBuilder()
                 .setId(request.getVehicleId())
                 .setUserId(userId)
@@ -51,8 +55,18 @@ public class PostServiceImpl implements PostService {
         Post post = postMapper.toEntity(request);
         post.setUserId(userId);
         post.setStatus(PostStatus.WAITING_PAYMENT);
-
         postRepository.save(post);
+        postRepository.flush();
+
+        PaymentUrlResponse response = paymentServiceBlockingStub.getPaymentUrl(
+                PaymentUrlRequest.newBuilder()
+                        .setAmount(200000)
+                        .setIpAddress(Helper.getIpAddress(httpServletRequest))
+                        .setTxnRef(post.getId())
+                        .build()
+        );
+
+        return Map.of("paymentUrl", response.getVnpUrl());
     }
 
     @Override

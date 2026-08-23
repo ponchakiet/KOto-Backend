@@ -1,13 +1,17 @@
 package poncha.kiet.paymentservice.service;
 
+import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
-import poncha.kiet.paymentservice.dto.request.InitPaymentRequest;
 import poncha.kiet.paymentservice.dto.response.InitPaymentResponse;
 import poncha.kiet.paymentservice.dto.response.IpnResponse;
 import poncha.kiet.paymentservice.entity.Payment;
 import poncha.kiet.paymentservice.entity.PaymentStatus;
+import poncha.kiet.paymentservice.grpc.PaymentServiceGrpc;
+import poncha.kiet.paymentservice.grpc.PaymentUrlRequest;
+import poncha.kiet.paymentservice.grpc.PaymentUrlResponse;
 import poncha.kiet.paymentservice.repository.PaymentRepository;
 import poncha.kiet.paymentservice.utils.*;
 
@@ -19,7 +23,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 @RequiredArgsConstructor
-public class PaymentService {
+@GrpcService
+public class PaymentService extends PaymentServiceGrpc.PaymentServiceImplBase {
     private final PaymentRepository paymentRepository;
 
     public static final String VERSION = "2.1.0";
@@ -33,8 +38,8 @@ public class PaymentService {
     @Value("${payment.vnpay.timeout}")
     private Integer paymentTimeout; //minutes
 
-    public InitPaymentResponse init(InitPaymentRequest request) {
-        var amount = request.getAmount() * DEFAULT_MULTIPLIER;  // 1. amount * 100
+    @Override
+    public void getPaymentUrl(PaymentUrlRequest request, StreamObserver<PaymentUrlResponse> responseObserver) {        var amount = request.getAmount() * DEFAULT_MULTIPLIER;  // 1. amount * 100
         var txnRef = request.getTxnRef();                       // 2. registerId
         var returnUrl = VNPayUtils.buildReturnUrl(txnRef);                 // 3. FE redirect by returnUrl
 
@@ -69,8 +74,13 @@ public class PaymentService {
         params.put(VNPayParams.ORDER_TYPE, ORDER_TYPE);
 
         var initPaymentUrl = VNPayUtils.buildInitPaymentUrl(params);
-        return InitPaymentResponse.builder()
-                .vnpUrl(initPaymentUrl).build();
+
+        PaymentUrlResponse response = PaymentUrlResponse.newBuilder()
+                .setVnpUrl(initPaymentUrl)
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Transactional

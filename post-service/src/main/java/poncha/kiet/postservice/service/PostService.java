@@ -1,5 +1,6 @@
 package poncha.kiet.postservice.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface PostService {
-    void createPost(PostRequestDTO request, String userId);
+    Map<String, String> createPost(PostRequestDTO request, String userId, HttpServletRequest httpServletRequest);
 
     Map<String, String> updatePost(String postId, String userId, PostRequestDTO updateRequest) throws AccessDeniedException;
 

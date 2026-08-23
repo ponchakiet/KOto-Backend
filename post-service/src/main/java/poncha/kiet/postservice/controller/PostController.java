@@ -1,5 +1,6 @@
 package poncha.kiet.postservice.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -129,13 +130,14 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<Response<Void>> createPost(
+    public ResponseEntity<Response<Map<String, String>>> createPost(
             @RequestHeader("X-UserId") String userId,
-            @RequestBody PostRequestDTO request) {
-        postService.createPost(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Void>builder()
+            @RequestBody PostRequestDTO request,
+            HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Create post successfully")
+                .data(postService.createPost(request, userId, httpServletRequest))
                 .timestamp(LocalDateTime.now())
                 .build());
     }
