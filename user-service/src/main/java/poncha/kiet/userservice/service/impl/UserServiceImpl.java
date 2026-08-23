@@ -2,6 +2,7 @@ package poncha.kiet.userservice.service.impl;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -70,11 +72,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileResponseDTO findProfileUser(String id) {
-        UserProfile user = userRepository.findProfileUser(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found user"));
+    public UserProfileResponseDTO findProfileUser(String id, HttpServletRequest httpServletRequest) {
+        Optional<UserProfile> optionalUserProfile = userRepository.findProfileUser(id);
 
-        return userMapper.toResponseDto(user);
+        if (!optionalUserProfile.isPresent()) {
+            String keycloakId = httpServletRequest.getHeader("X-UserId");
+            String username = httpServletRequest.getHeader("X-Username");
+            String email = httpServletRequest.getHeader("X-Email");
+            String firstName = httpServletRequest.getHeader("X-FirstName");
+            String lastName = httpServletRequest.getHeader("X-LastName");
+            User user = User.builder()
+                    .id(keycloakId)
+                    .username(username)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .email(email)
+                    .build();
+            userRepository.save(user);
+            return userMapper.toResponseDto(user);
+        }
+        UserProfile userProfile = optionalUserProfile.get();
+        return userMapper.toResponseDto(userProfile);
     }
 
     @Override

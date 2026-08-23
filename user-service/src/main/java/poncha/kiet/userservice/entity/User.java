@@ -31,11 +31,13 @@ public class User {
     @Column(name = "dob")
     private LocalDate dob;
     @Column(name = "created_at", nullable = false)
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     @Column(name = "last_access")
     private LocalDateTime lastAccess;
     @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Builder.Default
+    private boolean isActive = true;
     @Column(name = "sex")
     private boolean sex;
     @Column(name = "phone_number")

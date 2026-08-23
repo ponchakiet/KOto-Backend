@@ -1,5 +1,6 @@
 package poncha.kiet.userservice.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +18,7 @@ public interface UserService {
 
     UserSignUpRequestDTO createUser(UserSignUpRequestDTO request);
 
-    UserProfileResponseDTO findProfileUser(String id);
+    UserProfileResponseDTO findProfileUser(String id, HttpServletRequest httpServletRequest);
 
     UserResponseDTO findById(String id);
 

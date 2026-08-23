@@ -25,6 +25,8 @@ public interface UserMapper {
 
     UserProfileResponseDTO toResponseDto(UserProfile user);
 
+    UserProfileResponseDTO toResponseDto(User user);
+
     UserLandingPageResponseDTO toLanding(UserLandingPage userLandingPage);
 
     void updateUserFromRequest(UserUpdateDTO userUpdateDTO, @MappingTarget User user);

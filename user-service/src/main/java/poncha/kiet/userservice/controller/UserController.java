@@ -1,5 +1,6 @@
 package poncha.kiet.userservice.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
@@ -69,11 +70,13 @@ public class UserController {
     }
 
     @GetMapping("/users/profile")
-    public ResponseEntity<Response<UserProfileResponseDTO>> getProfileUser(@RequestHeader("X-UserId") String id) {
+    public ResponseEntity<Response<UserProfileResponseDTO>> getProfileUser(
+            HttpServletRequest httpServletRequest,
+            @RequestHeader("X-UserId") String id) {
         return ResponseEntity.ok(Response.<UserProfileResponseDTO>builder()
                 .success(true)
                 .message("Get profile user successfully")
-                .data(userService.findProfileUser(id))
+                .data(userService.findProfileUser(id, httpServletRequest))
                 .timestamp(LocalDateTime.now())
                 .build());
     }
@@ -93,8 +96,7 @@ public class UserController {
 
     @PutMapping("/users/{userId}/last-access")
     public ResponseEntity<Response<Void>> updateLastAccess(
-            @PathVariable("userId") String id
-    ) {
+            @RequestHeader("X-UserId") String id) {
         userService.updateLastAccess(id);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)

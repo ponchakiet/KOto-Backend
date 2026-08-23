@@ -1,15 +1,13 @@
 package poncha.kiet.userservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import poncha.kiet.userservice.dto.request.UserSignUpRequestDTO;
+import poncha.kiet.userservice.entity.UserRole;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,12 +69,45 @@ public class KeycloakService {
         headers.setBearerAuth(getAdminToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, Object>> requesHttpEntity = new HttpEntity<>(user, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        HttpEntity<Map<String, Object>> requestHttpEntity = new HttpEntity<>(user, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestHttpEntity, String.class);
 
         String location = response.getHeaders().getFirst("Location");
         String userId = location != null ? location.substring(location.lastIndexOf("/") + 1) : null;
 
         request.setUserId(userId);
+
+        if (userId != null) {
+            assignRoleToUser(userId, UserRole.ROLE_USER.name());
+        }
+    }
+
+    private void assignRoleToUser(String userId, String roleName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(getAdminToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String roleUrl = keycloakUrl + "/admin/realms/" + realm + "/roles/" + roleName;
+        ResponseEntity<Map> roleResponse = restTemplate.exchange(
+                roleUrl,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                Map.class
+        );
+
+        Map<String, Object> role = roleResponse.getBody();
+
+        if (role == null) {
+            throw new RuntimeException("Role not found: " + roleName);
+        }
+
+        // 2. Assign role to user
+        String assignUrl = keycloakUrl + "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/realm";
+        restTemplate.exchange(
+                assignUrl,
+                HttpMethod.POST,
+                new HttpEntity<>(List.of(role), headers),
+                String.class
+        );
     }
 }
