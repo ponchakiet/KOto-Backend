@@ -1,5 +1,6 @@
 package poncha.kiet.paymentservice.kafka;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -8,8 +9,8 @@ import poncha.kiet.paymentservice.event.PaymentEvent;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PaymentPublisher {
-    @Autowired
     private KafkaTemplate<String, PaymentEvent> kafkaTemplate;
     private final String TOPIC = "koto-payment-topic";
 

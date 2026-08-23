@@ -5,7 +5,7 @@ server:
 
 grpc:
   server:
-    port: 9095
+    port: 9195
     enable-reflection: true
 
 spring:
@@ -19,26 +19,26 @@ spring:
     properties:
       hibernate:
         format_sql: true
-#  kafka:
-#    producer:
-#      bootstrap-servers: 127.0.0.1:19091,127.0.0.1:19092,127.0.0.1:19093
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      properties:
-#        spring.json.type.mapping: orderEvent:poncha.kiet.paymentservice.event.OrderEvent
-#
-#    consumer:
-#      group-id: saga-service
-#      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-#      properties:
-#        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
-#        spring.json.trusted.packages: "*"
-#        spring.json.type.mapping: paymentEvent:poncha.kiet.paymentservice.event.PaymentEvent
-#      auto-offset-reset: earliest
+  kafka:
+    producer:
+      bootstrap-servers: 127.0.0.1:19091,127.0.0.1:19092,127.0.0.1:19093
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: paymentEvent:poncha.kiet.paymentservice.event.PaymentEvent
+
+    consumer:
+      group-id: saga-service
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: paymentEvent:poncha.kiet.paymentservice.event.PaymentEvent
+      auto-offset-reset: earliest
 
 payment:
   vnPay:
-    return-url: http://localhost:5173
+    return-url: http://localhost:5173/my-ads
     tmnCode: CTZP4C9Z
     secret-key: QONMTIAEGM9Y8FY3AP2Z19KBJCCSBC63
     version: 2.1.0

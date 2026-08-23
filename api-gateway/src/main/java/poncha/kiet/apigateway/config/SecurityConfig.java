@@ -21,6 +21,7 @@ public class SecurityConfig {
                         .pathMatchers("/user-service/api/v1/public/**").permitAll()
                         .pathMatchers("/search-service/api/v1/**").permitAll()
                         .pathMatchers("/user-service/api/v1/users/sign-up").permitAll()
+                        .pathMatchers("/payment-service/api/v1/vn-pay-callback").permitAll()
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

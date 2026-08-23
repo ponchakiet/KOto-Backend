@@ -22,6 +22,7 @@ import poncha.kiet.postservice.projection.StatusCount;
 import poncha.kiet.postservice.repository.CommentRepository;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
+import poncha.kiet.postservice.utils.AppConstant;
 import poncha.kiet.postservice.utils.Helper;
 
 import java.nio.file.AccessDeniedException;
@@ -60,7 +61,9 @@ public class PostServiceImpl implements PostService {
 
         PaymentUrlResponse response = paymentServiceBlockingStub.getPaymentUrl(
                 PaymentUrlRequest.newBuilder()
-                        .setAmount(200000)
+                        .setAmount(AppConstant.PRICE_CREATED)
+                        .setPurposeType(PurposeType.POST.name())
+                        .setTransactionType(TransactionType.CREATED.name())
                         .setIpAddress(Helper.getIpAddress(httpServletRequest))
                         .setTxnRef(post.getId())
                         .build()
@@ -117,6 +120,24 @@ public class PostServiceImpl implements PostService {
 
         post.setStatus(PostStatus.SHOW);
         postRepository.save(post);
+    }
+
+    @Override
+    public void updateStatusPost(String postId, PostStatus status) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
+
+        post.setStatus(status);
+        postRepository.save(post);
+    }
+
+    @Override
+    @Transactional
+    public void deletePost(String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
+
+        postRepository.delete(post);
     }
 
     @Override

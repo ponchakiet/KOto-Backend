@@ -13,13 +13,13 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentConsumer {
-//    @KafkaListener(topics = "order-topic", groupId = "saga-service")
-//    public void consumeEventAndPublishTopic(List<OrderEvent> orderEvents) {
-//        System.out.println("consume");
-    //        Flux.fromIterable(orderEvents)
-    //                .flatMap(this::processPayment)
-    //                .subscribe();
-}
+    @KafkaListener(topics = "order-topic", groupId = "saga-service")
+    public void consumeEventAndPublishTopic(List<OrderEvent> orderEvents) {
+        System.out.println("consume");
+        //        Flux.fromIterable(orderEvents)
+        //                .flatMap(this::processPayment)
+        //                .subscribe();
+    }
 //    private Mono<PaymentEvent> processPayment(OrderEvent orderEvent) {
 //        if (OrderStatus.ORDER_CREATED.equals(orderEvent.getOrderStatus())) {
 //            return Mono.fromSupplier(() -> paymentService.newOrderEvent(orderEvent));

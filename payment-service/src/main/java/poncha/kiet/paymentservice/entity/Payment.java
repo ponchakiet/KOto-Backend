@@ -44,8 +44,8 @@ public class Payment {
     private String transactionRef;
 
     @Column(name = "user_id")
-    private LocalDateTime userId;
+    private String userId;
 
     @Column(name = "purpose_id")
-    private LocalDateTime purposeId;
+    private String purposeId;
 }

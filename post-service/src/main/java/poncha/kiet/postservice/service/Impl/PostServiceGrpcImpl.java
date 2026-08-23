@@ -9,6 +9,8 @@ import poncha.kiet.postservice.grpc.PostCheckAttachResponse;
 import poncha.kiet.postservice.grpc.PostToVehicleServiceGrpc;
 import poncha.kiet.postservice.repository.PostRepository;
 
+import java.util.List;
+
 @GrpcService
 @RequiredArgsConstructor
 public class PostServiceGrpcImpl extends PostToVehicleServiceGrpc.PostToVehicleServiceImplBase {
@@ -16,7 +18,8 @@ public class PostServiceGrpcImpl extends PostToVehicleServiceGrpc.PostToVehicleS
 
     @Override
     public void checkAttachedPost(PostCheckAttachRequest request, StreamObserver<PostCheckAttachResponse> responseObserver) {
-        boolean isAttached = postRepository.existsByVehicleIdAndStatus(request.getId(), PostStatus.SHOW);
+        boolean isAttached = postRepository.existsByVehicleIdAndStatusIn(request.getId(),
+                List.of(PostStatus.SHOW, PostStatus.HIDE, PostStatus.WAITING_PAYMENT, PostStatus.WAITING_ACCEPT));
         PostCheckAttachResponse response = PostCheckAttachResponse.newBuilder()
                 .setIsAttached(isAttached)
                 .build();

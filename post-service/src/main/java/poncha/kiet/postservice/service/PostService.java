@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import poncha.kiet.postservice.dto.request.PostRequestDTO;
 import poncha.kiet.postservice.dto.response.*;
+import poncha.kiet.postservice.entity.PostStatus;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -21,6 +22,9 @@ public interface PostService {
 
     void acceptPost(List<String> roles, String postId);
 
+    void updateStatusPost(String postId, PostStatus status);
+
+    void deletePost(String postId);
 
     void likePost(String userId, String postId);
 

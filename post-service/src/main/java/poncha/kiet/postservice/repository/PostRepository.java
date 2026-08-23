@@ -24,7 +24,7 @@ public interface PostRepository extends JpaRepository<Post, String> {
             """)
     Page<Post> findAllByType(Pageable pageable, @Param("type") PostType type, @Param("status") PostStatus status);
 
-    boolean existsByVehicleIdAndStatus(String vehicleId, PostStatus status);
+    boolean existsByVehicleIdAndStatusIn(String vehicleId, List<PostStatus> status);
 
     Page<PostHistory> findAllByVehicleIdAndUserId(String vehicleId, String userId, Pageable pageable);
 

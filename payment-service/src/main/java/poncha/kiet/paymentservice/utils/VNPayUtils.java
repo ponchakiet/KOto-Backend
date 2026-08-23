@@ -2,6 +2,8 @@ package poncha.kiet.paymentservice.utils;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import poncha.kiet.paymentservice.entity.PurposeType;
+import poncha.kiet.paymentservice.entity.TransactionType;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -92,8 +94,8 @@ public class VNPayUtils {
         return String.format(returnUrlFormat);
     }
 
-    public static String buildPaymentDetail(String orderId) {
-        return String.format("Payment for order(s): %s", "x");
+    public static String buildPaymentDetail(String orderId, PurposeType purposeType, TransactionType transactionType) {
+        return String.format("%s|%s|%s", orderId, purposeType.name(), transactionType.name());
     }
 
     public static String hmacSHA512(final String key, final String data) {
