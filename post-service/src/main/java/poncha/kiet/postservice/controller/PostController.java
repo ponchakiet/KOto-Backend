@@ -92,12 +92,27 @@ public class PostController {
 
     @DeleteMapping("/posts/{postId}")
     public ResponseEntity<Response<Void>> deletePost(
+            @RequestHeader("X-Roles") List<String> roles,
             @RequestHeader("X-UserId") String userId,
             @PathVariable("postId") String postId) {
-        postService.inActivePost(userId, postId);
+        postService.inActivePost(userId, roles, postId);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
                 .message("Delete post successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PutMapping("/posts/{postId}/hide")
+    public ResponseEntity<Response<Map<String, String>>> hide(
+            @RequestHeader("X-Roles") List<String> roles,
+            @RequestHeader("X-UserId") String userId,
+            @PathVariable("postId") String postId) {
+
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
+                .success(true)
+                .message("Hide post successfully")
+                .data(postService.hidePost(userId, roles, postId))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

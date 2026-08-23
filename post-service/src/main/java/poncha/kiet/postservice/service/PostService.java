@@ -16,7 +16,9 @@ public interface PostService {
 
     Map<String, String> updatePost(String postId, String userId, PostRequestDTO updateRequest) throws AccessDeniedException;
 
-    void inActivePost(String userId, String postId);
+    void inActivePost(String userId, List<String> roles, String postId);
+
+    Map<String, String> hidePost(String userId, List<String> roles, String postId);
 
     void rejectPost(List<String> roles, String postId);
 

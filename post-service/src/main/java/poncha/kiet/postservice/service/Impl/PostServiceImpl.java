@@ -86,16 +86,33 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void inActivePost(String userId, String postId) {
+    public void inActivePost(String userId, List<String> roles, String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
-        if (!post.getUserId().equals(userId))
+        if (!post.getUserId().equals(userId) && !roles.contains(UserRole.ROLE_WEBMASTER.name()))
             throw new UnauthorizedException("Don't have permission for this resource");
 
         post.setStatus(PostStatus.DELETE);
         postRepository.save(post);
 
+    }
+
+    @Override
+    public Map<String, String> hidePost(String userId, List<String> roles, String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found post"));
+
+        if (post.getStatus() != PostStatus.SHOW)
+            throw new RuntimeException("Invalid status");
+
+        if (!post.getUserId().equals(userId) && !roles.contains(UserRole.ROLE_WEBMASTER.name()))
+            throw new UnauthorizedException("Don't have permission for this resource");
+
+        post.setStatus(PostStatus.HIDE);
+        postRepository.save(post);
+
+        return Map.of("id", postId);
     }
 
     @Override
