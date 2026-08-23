@@ -1,13 +1,14 @@
+from http import HTTPStatus
+
 import uvicorn
-from fastapi import FastAPI, HTTPException
-from langchain_openai import OpenAIEmbeddings
+from fastapi import FastAPI, HTTPException, UploadFile, File
 import py_eureka_client.eureka_client as eureka_client
 
 from request.QueryRequest import QueryRequest
 from response.QueryResponse import QueryResponse
+from service.embeeding_service import markdown_chunking
 from service.rag_qa import ask_question
 
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
 app = FastAPI(root_path="/rag-service")
 
 
@@ -40,6 +41,20 @@ async def chat_endpoint(request: QueryRequest):
 async def root():
     print("ok")
     return {"message": "Hello World"}
+
+@app.post("/api/v1/feed")
+async def feed(file: UploadFile = File(...)):
+    await markdown_chunking(file)
+    return {
+        "message": "Success",
+        "code": HTTPStatus.OK
+    }
+
+# @app.post("/api/v1/chunking")
+# async def ok(file: UploadFile = File(...)):
+#     # Chunk Markdown
+#     chunks = await markdown_chunking(file, max_chunk_size=500)
+#     return {"message": chunks}
 
 
 # @app.get("/hello/{name}")

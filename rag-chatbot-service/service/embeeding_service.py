@@ -1,18 +1,59 @@
 import os
+import uuid
 
 import numpy as np
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
+from langchain_openai import OpenAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from pinecone import Pinecone, ServerlessSpec
 from sklearn.metrics.pairwise import cosine_similarity
 
 from langchain_pinecone import PineconeVectorStore
 
-from main import embedding_model
+from service.llama_parse_service import parse_markdown
+
+load_dotenv()
+embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+
+
+async def markdown_chunking(file):
+    markdown_text = await parse_markdown(file)
+
+    headers_to_split_on = [
+        ("#", "Header 1"),
+        ("##", "Header 2"),
+        ("###", "Header 3"),
+    ]
+    md_splitter = MarkdownHeaderTextSplitter(
+        headers_to_split_on=headers_to_split_on,
+        strip_headers=False
+    )
+    md_sections = md_splitter.split_text(markdown_text)
+    docs = []
+
+    for section in md_sections:
+        content = section.page_content.strip()
+        if not content:
+            continue
+        chunks = semantic_chunking(content)
+
+        for i, chunk in enumerate(chunks):
+            docs.append({
+                "id": f"{file.filename}_{i}_{uuid.uuid4().hex}",  # unique ID
+                "text": chunk,
+                "metadata": {
+                    "filename": file.filename,
+                    "chunk_index": i,
+                    "length": len(chunk),
+                }
+            })
+
+    await index_to_pinecone(docs)
 
 
 def semantic_chunking(text, chunk_size=500, chunk_overlap=50, similarity_threshold=0.85):
-    print(chunk_size)
-    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+                                              separators=["\n\n", "\n", ".", " ", ""], )
     initial_chunks = splitter.split_text(text)
     embeddings = embedding_model.embed_documents(initial_chunks)
 
@@ -40,7 +81,7 @@ def semantic_chunking(text, chunk_size=500, chunk_overlap=50, similarity_thresho
     return merged_chunks
 
 
-def index_to_pinecone(data):
+def index_to_pinecone(docs):
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
     index_name = os.getenv("PINECONE_INDEX_NAME")
     if index_name not in pc.list_indexes().names():
@@ -50,9 +91,17 @@ def index_to_pinecone(data):
             metric="cosine",
             spec=ServerlessSpec(cloud="aws", region="us-east-1")
         )
+    # Embedding model
 
-    # Get index object
-    index = pc.Index(name=index_name)
+    PineconeVectorStore.from_texts(
+        texts=[doc["text"] for doc in docs],
+        embedding=embedding_model,
+        metadatas=[doc["metadata"] for doc in docs],
+        index_name=index_name,
+    )
+
+
+async def feed_db(data):
     docs = []
 
     for post in data["response"]:
@@ -79,9 +128,4 @@ def index_to_pinecone(data):
             }
         })
 
-    PineconeVectorStore.from_texts(
-        texts=[doc["text"] for doc in docs],
-        embedding=embedding_model,
-        metadatas=[doc["metadata"] for doc in docs],
-        index_name=index_name,
-    )
+    await index_to_pinecone(docs)
