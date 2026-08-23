@@ -26,6 +26,9 @@ public class GlobalExceptionHandler {
             case NOT_FOUND:
                 httpStatus = HttpStatus.NOT_FOUND;
                 break;
+            case PERMISSION_DENIED:
+                httpStatus = HttpStatus.FORBIDDEN;
+                break;
             case UNAVAILABLE:
                 httpStatus = HttpStatus.SERVICE_UNAVAILABLE;
                 break;

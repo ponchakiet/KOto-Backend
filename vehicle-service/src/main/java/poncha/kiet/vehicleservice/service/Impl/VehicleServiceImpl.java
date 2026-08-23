@@ -23,6 +23,7 @@ import poncha.kiet.vehicleservice.mapper.VehicleMapper;
 import poncha.kiet.vehicleservice.projection.VehicleSummary;
 import poncha.kiet.vehicleservice.repository.ProjectRepository;
 import poncha.kiet.vehicleservice.repository.VehicleRepository;
+import poncha.kiet.vehicleservice.service.PostServiceGrpcClient;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
 import java.io.IOException;
@@ -43,8 +44,7 @@ public class VehicleServiceImpl implements VehicleService {
     private UserToVehicleServiceGrpc.UserToVehicleServiceBlockingStub serviceBlockingStub;
     @GrpcClient("uploadServiceGrpc")
     private UploadServiceGrpc.UploadServiceStub uploadServiceStub;
-    @GrpcClient("postServiceGrpc")
-    private PostToVehicleServiceGrpc.PostToVehicleServiceBlockingStub postServiceStub;
+    private final PostServiceGrpcClient postServiceGrpcClient;
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
     private final ProjectRepository projectRepository;
@@ -54,7 +54,7 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
-        PostCheckAttachResponse postCheckAttachResponse = postServiceStub.checkAttachedPost(
+        PostCheckAttachResponse postCheckAttachResponse = postServiceGrpcClient.checkAttachedPost(
                 PostCheckAttachRequest.newBuilder()
                         .setId(vehicle.getId())
                         .build()
@@ -80,7 +80,7 @@ public class VehicleServiceImpl implements VehicleService {
 
         Page<VehicleSummaryResponseDTO> data = page.map(a -> {
             VehicleSummaryResponseDTO response = vehicleMapper.toSummary(a);
-            PostCheckAttachResponse isAttached = postServiceStub.checkAttachedPost(PostCheckAttachRequest.newBuilder()
+            PostCheckAttachResponse isAttached = postServiceGrpcClient.checkAttachedPost(PostCheckAttachRequest.newBuilder()
                     .setId(a.getId())
                     .build());
 
@@ -99,7 +99,7 @@ public class VehicleServiceImpl implements VehicleService {
         if (!vehicle.getUserId().equals(userId))
             throw new AccessDeniedException("Don't have permission for this resource");
 
-        PostCheckAttachResponse response = postServiceStub.checkAttachedPost(
+        PostCheckAttachResponse response = postServiceGrpcClient.checkAttachedPost(
                 PostCheckAttachRequest.newBuilder()
                         .setId(vehicle.getId())
                         .build());
@@ -225,7 +225,7 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(request.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Not found vehicle"));
 
-        PostCheckAttachResponse response = postServiceStub.checkAttachedPost(
+        PostCheckAttachResponse response = postServiceGrpcClient.checkAttachedPost(
                 PostCheckAttachRequest.newBuilder()
                         .setId(vehicle.getId())
                         .build()

@@ -22,6 +22,8 @@ import poncha.kiet.postservice.projection.StatusCount;
 import poncha.kiet.postservice.repository.CommentRepository;
 import poncha.kiet.postservice.repository.PostRepository;
 import poncha.kiet.postservice.service.PostService;
+import poncha.kiet.postservice.service.UserServiceGrpcClient;
+import poncha.kiet.postservice.service.VehicleServiceGrpcClient;
 import poncha.kiet.postservice.utils.AppConstant;
 import poncha.kiet.postservice.utils.Helper;
 
@@ -34,12 +36,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
     private final UserMapper userMapper;
-    @GrpcClient("vehicleServiceGrpc")
-    private VehicleToPostServiceGrpc.VehicleToPostServiceBlockingStub vehicleServiceBlockingStub;
-    @GrpcClient("userServiceGrpc")
-    private UserToPostServiceGrpc.UserToPostServiceBlockingStub userServiceBlockingStub;
     @GrpcClient("paymentServiceGrpc")
     private PaymentServiceGrpc.PaymentServiceBlockingStub paymentServiceBlockingStub;
+    private final VehicleServiceGrpcClient vehicleServiceGrpcClient;
+    private final UserServiceGrpcClient userServiceGrpcClient;
     private final PostMapper postMapper;
     private final PostRepository postRepository;
     private final VehicleMapper vehicleMapper;
@@ -48,7 +48,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Map<String, String> createPost(PostRequestDTO request, String userId, HttpServletRequest httpServletRequest) {
-        vehicleServiceBlockingStub.checkExisted(VehicleRequest.newBuilder()
+        vehicleServiceGrpcClient.checkExisted(VehicleRequest.newBuilder()
                 .setId(request.getVehicleId())
                 .setUserId(userId)
                 .build());
@@ -203,17 +203,12 @@ public class PostServiceImpl implements PostService {
 
         Page<PostResponseDTO> posts = postPage
                 .map(p -> {
-                    VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(VehicleRequest.newBuilder()
+                    VehicleResponse vehicleResponse = vehicleServiceGrpcClient.getVehicleDetail(VehicleRequest.newBuilder()
                             .setId(p.getVehicleId())
-                            .build());
-
-                    UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub.getUserInfo(UserInfoRequest.newBuilder()
-                            .setId(p.getUserId())
                             .build());
 
                     PostResponseDTO postResponseDTO = postMapper.toDto(p);
                     postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
-                    postResponseDTO.setUserInfo(userMapper.toResponseDTO(userPostInfoResponse));
                     return postResponseDTO;
                 });
 
@@ -224,11 +219,16 @@ public class PostServiceImpl implements PostService {
     public List<PostResponseDTO> findAll() {
         List<PostResponseDTO> postResponseDTOS = postRepository.findAll().stream()
                 .map(p -> {
-                    VehicleResponse vehicleResponse = vehicleServiceBlockingStub.getVehicleDetail(
+                    VehicleResponse vehicleResponse = vehicleServiceGrpcClient.getVehicleDetail(
                             VehicleRequest.newBuilder().setId(p.getVehicleId()).build()
                     );
+                    UserPostInfoResponse userPostInfoResponse = userServiceGrpcClient.getUserInfo(UserInfoRequest.newBuilder()
+                            .setId(p.getUserId())
+                            .build());
+
                     PostResponseDTO postResponseDTO = postMapper.toDto(p);
                     postResponseDTO.setVehicleDetail(vehicleMapper.toDto(vehicleResponse));
+                    postResponseDTO.setUserInfo(userMapper.toResponseDTO(userPostInfoResponse));
                     return postResponseDTO;
                 }).toList();
 
@@ -242,7 +242,7 @@ public class PostServiceImpl implements PostService {
         Page<PostOverviewResponseDTO> data = postOverviews
                 .map(p -> {
                     PostOverviewResponseDTO postOverviewResponseDTO = postMapper.toOverview(p);
-                    Content content = vehicleServiceBlockingStub.getPoster(
+                    Content content = vehicleServiceGrpcClient.getPoster(
                             VehicleRequest.newBuilder()
                                     .setUserId(p.getUserId())
                                     .setId(p.getVehicleId())
@@ -263,7 +263,7 @@ public class PostServiceImpl implements PostService {
                 .map(p -> {
                     PostWebmasterOverviewResponseDTO dto = postMapper.toWebmasterResponse(p);
 
-                    UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub.getUserInfo(
+                    UserPostInfoResponse userPostInfoResponse = userServiceGrpcClient.getUserInfo(
                             UserInfoRequest.newBuilder()
                                     .setId(p.getUserId())
                                     .build());
@@ -328,7 +328,7 @@ public class PostServiceImpl implements PostService {
                             .createdAt(c.getCreatedAt())
                             .build();
 
-                    UserPostInfoResponse userPostInfoResponse = userServiceBlockingStub
+                    UserPostInfoResponse userPostInfoResponse = userServiceGrpcClient
                             .getUserInfo(UserInfoRequest.newBuilder()
                                     .setId(c.getUserId())
                                     .build());

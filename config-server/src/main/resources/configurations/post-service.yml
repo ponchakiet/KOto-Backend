@@ -24,8 +24,8 @@ spring:
       bootstrap-servers: 127.0.0.1:19091,127.0.0.1:19092,127.0.0.1:19093
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      properties:
-#        spring.json.type.mapping: paymentEvent:poncha.kiet.paymentservice.event.PaymentEvent
+    #      properties:
+    #        spring.json.type.mapping: paymentEvent:poncha.kiet.paymentservice.event.PaymentEvent
 
     consumer:
       group-id: koto-post
@@ -50,3 +50,32 @@ grpc:
   server:
     port: 9194
     enable-reflection: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+      vehicleServiceCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+  retry:
+    instances:
+      userServiceRetry:
+        maxAttempts: 3
+        waitDuration: 500ms
+      vehicleServiceRetry:
+        maxAttempts: 3
+        waitDuration: 500ms
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers
