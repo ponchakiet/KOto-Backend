@@ -225,6 +225,15 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(request.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Not found vehicle"));
 
+        PostCheckAttachResponse response = postServiceStub.checkAttachedPost(
+                PostCheckAttachRequest.newBuilder()
+                        .setId(vehicle.getId())
+                        .build()
+        );
+
+        if (response.getIsAttached())
+            throw new RuntimeException("Vehicle is attaching post");
+
         if (!vehicle.getUserId().equals(userId))
             throw new AccessDeniedException("Don't have permission for this resource");
 

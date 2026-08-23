@@ -128,11 +128,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void acceptPost(List<String> roles, String postId) {
+    public void acceptPost(String userId, List<String> roles, String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
-        if (roles == null || !roles.contains(UserRole.ROLE_WEBMASTER.name()))
+        if (!post.getUserId().equals(userId) && !roles.contains(UserRole.ROLE_WEBMASTER.name()))
             throw new UnauthorizedException("Don't have permission for this resource");
 
         post.setStatus(PostStatus.SHOW);

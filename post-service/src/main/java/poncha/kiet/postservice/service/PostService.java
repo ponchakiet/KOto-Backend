@@ -22,7 +22,7 @@ public interface PostService {
 
     void rejectPost(List<String> roles, String postId);
 
-    void acceptPost(List<String> roles, String postId);
+    void acceptPost(String userId, List<String> roles, String postId);
 
     void updateStatusPost(String postId, PostStatus status);
 

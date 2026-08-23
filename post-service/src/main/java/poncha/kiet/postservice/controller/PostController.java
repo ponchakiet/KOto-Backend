@@ -160,8 +160,9 @@ public class PostController {
     @PostMapping("/posts/{postId}/accept")
     public ResponseEntity<Response<Void>> acceptPost(
             @RequestHeader("X-Roles") List<String> roles,
+            @RequestHeader("X-UserId") String userId,
             @PathVariable("postId") String postId) {
-        postService.acceptPost(roles, postId);
+        postService.acceptPost(userId, roles, postId);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
                 .message("Accept post successfully")

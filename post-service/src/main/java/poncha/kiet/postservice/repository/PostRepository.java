@@ -42,7 +42,6 @@ public interface PostRepository extends JpaRepository<Post, String> {
                 SELECT 'SHOW' AS status
                 UNION ALL SELECT 'EXPIRED'
                 UNION ALL SELECT 'REJECT'
-                UNION ALL SELECT 'PAYMENT'
                 UNION ALL SELECT 'HIDE'
                 UNION ALL SELECT 'WAITING_PAYMENT'
                 UNION ALL SELECT 'WAITING_ACCEPT'
