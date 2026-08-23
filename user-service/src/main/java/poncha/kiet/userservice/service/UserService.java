@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import poncha.kiet.userservice.dto.request.UserSignUpRequestDTO;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.FollowerResponse;
+import poncha.kiet.userservice.dto.response.UserLandingPageResponseDTO;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
 import poncha.kiet.userservice.dto.response.UserResponseDTO;
 
@@ -20,11 +21,15 @@ public interface UserService {
 
     UserResponseDTO findById(String id);
 
+    UserLandingPageResponseDTO findUserLandingPage(String userId);
+
+    Map<String, String> checkUserFollow(String userId, String followerId);
+
     UserResponseDTO updateUser(String id, UserUpdateDTO user);
 
     void updateLastAccess(String id);
 
-    Map<String, String> updateAvatar(String id, MultipartFile file);
+    Map<String, String> updateMedia(String id, String type, MultipartFile file);
 
     void inActiveUser(String id);
 
@@ -32,7 +37,7 @@ public interface UserService {
 
     Page<FollowerResponse> getFollowing(String id, Pageable pageable);
 
-    FollowerResponse followUser(String userId, String followerId);
+    Map<String, String> followUser(String userId, String followerId);
 
-    void unfollowUser(String userId, String followerId);
+    Map<String, String> unfollowUser(String userId, String followerId);
 }

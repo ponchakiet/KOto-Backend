@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import poncha.kiet.userservice.dto.request.UserSignUpRequestDTO;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.FollowerResponse;
+import poncha.kiet.userservice.dto.response.UserLandingPageResponseDTO;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
 import poncha.kiet.userservice.dto.response.UserResponseDTO;
 import poncha.kiet.userservice.entity.User;
@@ -21,13 +22,16 @@ import poncha.kiet.userservice.grpc.FileChunk;
 import poncha.kiet.userservice.grpc.UploadResponse;
 import poncha.kiet.userservice.grpc.UploadServiceGrpc;
 import poncha.kiet.userservice.mapper.UserMapper;
+import poncha.kiet.userservice.projection.UserLandingPage;
 import poncha.kiet.userservice.projection.UserProfile;
 import poncha.kiet.userservice.repository.UserRepository;
 import poncha.kiet.userservice.service.UserService;
+import poncha.kiet.userservice.utils.TypeMedia;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -82,6 +86,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserLandingPageResponseDTO findUserLandingPage(String userId) {
+        UserLandingPage userLandingPage = userRepository.findById(userId, UserLandingPage.class)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found user"));
+
+        Long totalFollower = userRepository.countFollowers(userId);
+        Long totalFollowing = userRepository.countFollowing(userId);
+
+        UserLandingPageResponseDTO responseDTO = userMapper.toLanding(userLandingPage);
+
+        responseDTO.setTotalFollower(totalFollower);
+        responseDTO.setTotalFollowing(totalFollowing);
+
+        return responseDTO;
+    }
+
+    @Override
+    public Map<String, String> checkUserFollow(String userId, String followerId) {
+        Long isFollow = userRepository.checkFollow(userId, followerId);
+
+        return Map.of("isFollow", isFollow.toString());
+    }
+
+    @Override
     @Transactional
     public UserResponseDTO updateUser(String id, UserUpdateDTO request) {
         User user = userRepository.findById(id)
@@ -114,7 +141,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Map<String, String> updateAvatar(String id, MultipartFile file) {
+    public Map<String, String> updateMedia(String id, String type, MultipartFile file) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + id));
 
@@ -159,10 +186,17 @@ public class UserServiceImpl implements UserService {
             if (responses[0] == null) {
                 throw new RuntimeException("No response received from upload service");
             }
-            user.setAvtUrl(responses[0].getUrl());
+            Map<String, String> data = new HashMap<>();
+            if (TypeMedia.AVT.name().equals(type)) {
+                user.setAvtUrl(responses[0].getUrl());
+                data.put("avtUrl", user.getAvtUrl());
+            } else {
+                user.setBannerUrl(responses[0].getUrl());
+                data.put("bannerUrl", user.getBannerUrl());
+            }
             userRepository.save(user);
 
-            return Map.of("avtUrl", user.getAvtUrl());
+            return data;
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file", e);
         } catch (InterruptedException e) {
@@ -202,34 +236,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public FollowerResponse followUser(String userId, String followerId) {
+    public Map<String, String> followUser(String userId, String followerId) {
         //follower id is people that click follow
         //user id is followed by follower
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + userId));
-
-        User follower = userRepository.findById(followerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + followerId));
-
-        if (userId.equals(followerId)) {
-            throw new IllegalArgumentException("You can not follow yourself");
+        Long checkFollow = userRepository.checkFollow(userId, followerId);
+        if (checkFollow > 0) {
+            throw new RuntimeException("User follow is existed");
         }
 
         userRepository.followUser(followerId, userId);
 
-        return userMapper.toFollowerResponse(user);
+        return Map.of("followerId", followerId);
     }
 
     @Override
     @Transactional
-    public void unfollowUser(String userId, String followerId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + userId));
-
-        User follower = userRepository.findById(followerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + followerId));
+    public Map<String, String> unfollowUser(String userId, String followerId) {
+        Long checkFollow = userRepository.checkFollow(userId, followerId);
+        if (checkFollow < 0) {
+            throw new RuntimeException("User follow is not existed");
+        }
 
         userRepository.unfollowUser(followerId, userId);
+
+        return Map.of("followerId", followerId);
     }
 
 

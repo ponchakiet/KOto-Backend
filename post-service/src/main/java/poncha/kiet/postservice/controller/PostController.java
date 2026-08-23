@@ -46,6 +46,19 @@ public class PostController {
                 .build());
     }
 
+    @GetMapping("/public/posts/landing")
+    public ResponseEntity<Response<PageResponse<PostOverviewResponseDTO>>> getPostsLanding(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(Response.<PageResponse<PostOverviewResponseDTO>>builder()
+                .success(true)
+                .message("Get posts landing successfully")
+                .data(PageResponse.build(postService.findAllByStatus("SHOW", null, userId, PageRequest.of(page, size))))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
     @GetMapping("/posts/webmaster")
     public ResponseEntity<Response<PageResponse<PostWebmasterOverviewResponseDTO>>> getPostsByWebmaster(
             @RequestParam(value = "page", defaultValue = "0") int page,

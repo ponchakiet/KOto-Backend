@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserProfileResponseDTO {
+    private String id;
     private String firstName;
     private String lastName;
     private String avtUrl;

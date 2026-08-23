@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 public class UserResponseDTO {
     private String id;
     private String username;
-    private String password;
+    private String bannerUrl;
+    private String description;
     private String email;
     private String firstName;
     private String lastName;

@@ -13,6 +13,7 @@ public class UserUpdateDTO {
     private String username;
     private String password;
     private String email;
+    private String description;
     private String firstName;
     private String lastName;
     private LocalDate dob;

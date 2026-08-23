@@ -19,6 +19,26 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     <T> Optional<T> findById(String id, Class<T> type);
 
+    @Query(value = """
+            SELECT COUNT(*) FROM follower as f
+            WHERE f.user_id =:userId
+            """, nativeQuery = true)
+    Long countFollowers(@Param("userId") String userId);
+
+    @Query(value = """
+            SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+            FROM follower
+            WHERE follower_id =:userId
+            AND user_id =:followerId
+            """, nativeQuery = true)
+    Long checkFollow(@Param("userId") String userId, @Param("followerId") String followerId);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM  follower as f
+            WHERE f.follower_id =:userId
+            """, nativeQuery = true)
+    Long countFollowing(@Param("userId") String userId);
+
     boolean findByUsername(String username);
 
     boolean findByEmail(String email);

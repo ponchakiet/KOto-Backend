@@ -18,13 +18,13 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private final KeycloakService keycloakService;
 
-    @PostMapping("/sign-up")
+    @PostMapping("/users/sign-up")
     public ResponseEntity<Response<UserSignUpRequestDTO>> signUpUser(@RequestBody UserSignUpRequestDTO request) {
         keycloakService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(Response.<UserSignUpRequestDTO>builder()
@@ -35,7 +35,17 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping
+    @GetMapping("/public/users/page/{userId}")
+    public ResponseEntity<Response<UserLandingPageResponseDTO>> getUserLandingPage(@PathVariable("userId") String userId) {
+        return ResponseEntity.ok(Response.<UserLandingPageResponseDTO>builder()
+                .success(true)
+                .message("Get user landing page successfully")
+                .data(userService.findUserLandingPage(userId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/users")
     public ResponseEntity<Response<PageResponse<UserResponseDTO>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -48,7 +58,7 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}")
     public ResponseEntity<Response<UserResponseDTO>> getUserById(@RequestHeader("X-UserId") String userId) {
         return ResponseEntity.ok(Response.<UserResponseDTO>builder()
                 .success(true)
@@ -58,7 +68,7 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping("/profile")
+    @GetMapping("/users/profile")
     public ResponseEntity<Response<UserProfileResponseDTO>> getProfileUser(@RequestHeader("X-UserId") String id) {
         return ResponseEntity.ok(Response.<UserProfileResponseDTO>builder()
                 .success(true)
@@ -68,7 +78,7 @@ public class UserController {
                 .build());
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping("/users/{userId}")
     public ResponseEntity<Response<UserResponseDTO>> updateProfile(
             @RequestHeader("X-UserId") String userId,
             @RequestBody UserUpdateDTO request
@@ -81,7 +91,7 @@ public class UserController {
                 .build());
     }
 
-    @PutMapping("/{userId}/last-access")
+    @PutMapping("/users/{userId}/last-access")
     public ResponseEntity<Response<Void>> updateLastAccess(
             @PathVariable("userId") String id
     ) {
@@ -93,20 +103,21 @@ public class UserController {
                 .build());
     }
 
-    @PostMapping(value = "/{userId}/update-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response<Map<String, String>>> updateAvatar(
+    @PostMapping(value = "/users/upload-media", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<Map<String, String>>> updateMedia(
             @RequestHeader("X-UserId") String userId,
+            @RequestParam(name = "type") String type,
             @RequestParam MultipartFile file
     ) {
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Update avatar successfully")
-                .data(userService.updateAvatar(userId, file))
+                .data(userService.updateMedia(userId, type, file))
                 .timestamp(LocalDateTime.now())
                 .build());
     }
 
-    @PatchMapping("/{userId}/deactivate")
+    @PatchMapping("/users/{userId}/deactivate")
     public ResponseEntity<Response<Void>> inActiveUser(
             @PathVariable("userId") String userId
     ) {
@@ -118,9 +129,9 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping("/{userId}/followers")
+    @GetMapping("/users/followers")
     public ResponseEntity<Response<PageResponse<FollowerResponse>>> getFollowers(
-            @PathVariable("userId") String id,
+            @RequestHeader("X-UserId") String id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(Response.<PageResponse<FollowerResponse>>builder()
@@ -131,9 +142,9 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping("/{userId}/following")
+    @GetMapping("/users/following")
     public ResponseEntity<Response<PageResponse<FollowerResponse>>> getFollowing(
-            @PathVariable("userId") String id,
+            @RequestHeader("X-UserId") String id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -145,12 +156,12 @@ public class UserController {
                 .build());
     }
 
-    @PostMapping("/{userId}/follow/{followerId}")
-    public ResponseEntity<Response<FollowerResponse>> followUser(
-            @PathVariable("userId") String id,
+    @PostMapping("/users/follow/{followerId}")
+    public ResponseEntity<Response<Map<String, String>>> followUser(
+            @RequestHeader("X-UserId") String id,
             @PathVariable("followerId") String followerId
     ) {
-        return ResponseEntity.ok(Response.<FollowerResponse>builder()
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Follow user successfully")
                 .data(userService.followUser(id, followerId))
@@ -158,9 +169,21 @@ public class UserController {
                 .build());
     }
 
-    @DeleteMapping("/{userId}/unfollow/{followerId}")
+    @GetMapping("/users/follow/{followerId}")
+    public ResponseEntity<Response<Map<String, String>>> checkUserFollow(
+            @RequestHeader("X-UserId") String id,
+            @PathVariable("followerId") String followerId) {
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
+                .success(true)
+                .message("Check user follow successfully")
+                .data(userService.checkUserFollow(id, followerId))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @DeleteMapping("/users/unfollow/{followerId}")
     public ResponseEntity<Response<Void>> unfollowUser(
-            @PathVariable("userId") String id,
+            @RequestHeader("X-UserId") String id,
             @PathVariable("followerId") String followerId
     ) {
         userService.unfollowUser(id, followerId);

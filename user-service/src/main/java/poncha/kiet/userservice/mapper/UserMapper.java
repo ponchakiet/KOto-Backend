@@ -5,10 +5,12 @@ import com.google.protobuf.Timestamp;
 import org.mapstruct.*;
 import poncha.kiet.userservice.dto.request.UserUpdateDTO;
 import poncha.kiet.userservice.dto.response.FollowerResponse;
+import poncha.kiet.userservice.dto.response.UserLandingPageResponseDTO;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
 import poncha.kiet.userservice.dto.response.UserResponseDTO;
 import poncha.kiet.userservice.entity.User;
 import poncha.kiet.userservice.grpc.UserPostInfoResponse;
+import poncha.kiet.userservice.projection.UserLandingPage;
 import poncha.kiet.userservice.projection.UserPostInfo;
 import poncha.kiet.userservice.projection.UserProfile;
 
@@ -22,6 +24,8 @@ public interface UserMapper {
     UserResponseDTO toDto(User user);
 
     UserProfileResponseDTO toResponseDto(UserProfile user);
+
+    UserLandingPageResponseDTO toLanding(UserLandingPage userLandingPage);
 
     void updateUserFromRequest(UserUpdateDTO userUpdateDTO, @MappingTarget User user);
 

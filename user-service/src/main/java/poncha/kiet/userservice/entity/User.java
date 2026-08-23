@@ -42,6 +42,10 @@ public class User {
     private String phoneNumber;
     @Column(name = "avt_url")
     private String avtUrl;
+    @Column(name = "banner_url")
+    private String bannerUrl;
+    @Column(name = "description")
+    private String description;
     @Column(name = "tax_code")
     private String taxCode;
     @Column(name = "cid")
