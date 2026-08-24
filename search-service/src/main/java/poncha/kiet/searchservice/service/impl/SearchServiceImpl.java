@@ -297,9 +297,12 @@ public class SearchServiceImpl implements SearchService {
             extractedRange(minPrice, maxPrice, "price", b);
             extractedRange(minYear, maxYear, "manufactureYear", b);
 
-            for (var x : restParams.entrySet()) {
-                extractedTermsFilter(x.getValue(), String.format("vehicleDetail.properties.%s", x.getKey()), b);
+            if (restParams != null) {
+                for (var x : restParams.entrySet()) {
+                    extractedTermsFilter(x.getValue(), String.format("vehicleDetail.properties.%s", x.getKey()), b);
+                }
             }
+
             return b;
         }));
 

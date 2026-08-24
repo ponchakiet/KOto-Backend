@@ -6,7 +6,7 @@ import py_eureka_client.eureka_client as eureka_client
 
 from request.QueryRequest import QueryRequest
 from response.QueryResponse import QueryResponse
-from service.embeeding_service import markdown_chunking
+from service.embeeding_service import markdown_chunking, markdown_chunking_file
 from service.rag_qa import ask_question
 
 app = FastAPI(root_path="/rag-service")
@@ -47,6 +47,14 @@ async def feed(file: UploadFile = File(...)):
     await markdown_chunking(file)
     return {
         "message": "Success",
+        "code": HTTPStatus.OK
+    }
+
+@app.post("/api/v1/test")
+async def feed(file: UploadFile = File(...)):
+    docs = await markdown_chunking_file(file)
+    return {
+        "doc": docs,
         "code": HTTPStatus.OK
     }
 

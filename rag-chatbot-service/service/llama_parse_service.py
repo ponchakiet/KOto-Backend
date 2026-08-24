@@ -4,8 +4,9 @@ import tempfile
 from dotenv import load_dotenv
 from llama_parse import LlamaParse
 
-parser = LlamaParse(api_key=os.getenv("LLAMA_PARSE_KEY"), result_type="markdown")
+load_dotenv()
 
+parser = LlamaParse(api_key=os.getenv("LLAMA_PARSE_KEY"), result_type="markdown")
 
 async def parse_markdown(uploaded_file):
     tmp_dir = tempfile.mkdtemp()

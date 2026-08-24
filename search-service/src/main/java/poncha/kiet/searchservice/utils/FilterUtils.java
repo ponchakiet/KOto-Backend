@@ -30,6 +30,7 @@ public class FilterUtils {
             MAX_YEAR,
             ORDER_BY,
             ORDER,
+            "keyword",
             "page",
             "size"
     );
