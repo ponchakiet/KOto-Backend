@@ -24,9 +24,6 @@ spring:
       bootstrap-servers: 127.0.0.1:19091,127.0.0.1:19092,127.0.0.1:19093
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    #      properties:
-    #        spring.json.type.mapping: paymentEvent:poncha.kiet.paymentservice.event.PaymentEvent
-
     consumer:
       group-id: koto-post
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer

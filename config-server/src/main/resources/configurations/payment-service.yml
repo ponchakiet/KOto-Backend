@@ -10,7 +10,7 @@ grpc:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres/koto_paymentdb
+    url: jdbc:postgresql://localhost:5432/koto_paymentdb
     username: postgres
     password: Ngocmai@1004
   jpa:
