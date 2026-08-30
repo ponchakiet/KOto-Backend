@@ -20,8 +20,9 @@ spring:
       hibernate:
         format_sql: true
   kafka:
+    bootstrap-servers: 127.0.0.1:19091
+
     producer:
-      bootstrap-servers: 127.0.0.1:19091,127.0.0.1:19092,127.0.0.1:19093
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
@@ -36,13 +37,13 @@ spring:
 grpc:
   client:
     vehicleServiceGrpc:
-      address: "discovery:///vehicle-service"
+      address: "static://localhost:9193"
       negotiationType: PLAINTEXT
     userServiceGrpc:
-      address: "discovery:///user-service"
+      address: "static://localhost:9191"
       negotiationType: PLAINTEXT
     paymentServiceGrpc:
-      address: "discovery:///payment-service"
+      address: "static://localhost:9195"
       negotiationType: PLAINTEXT
   server:
     port: 9194

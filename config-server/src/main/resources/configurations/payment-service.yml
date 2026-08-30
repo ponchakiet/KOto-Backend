@@ -20,8 +20,9 @@ spring:
       hibernate:
         format_sql: true
   kafka:
+    bootstrap-servers: 127.0.0.1:19091
+
     producer:
-      bootstrap-servers: 127.0.0.1:19091,127.0.0.1:19092,127.0.0.1:19093
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:

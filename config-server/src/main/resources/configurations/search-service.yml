@@ -33,5 +33,5 @@ spring:
 grpc:
   client:
     postServiceGrpc:
-      address: "discovery:///post-service"
+      address: "static://localhost:9194"
       negotiationType: PLAINTEXT

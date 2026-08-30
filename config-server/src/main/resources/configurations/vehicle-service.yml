@@ -20,13 +20,13 @@ spring:
 grpc:
   client:
     userServiceGrpc:
-      address: "discovery:///user-service"
+      address: "static://localhost:9191"
       negotiationType: PLAINTEXT
     postServiceGrpc:
-      address: "discovery:///post-service"
+      address: "static://localhost:9194"
       negotiationType: PLAINTEXT
     uploadServiceGrpc:
-      address: "discovery:///upload-service"
+      address: "static://localhost:9192"
       negotiationType: PLAINTEXT
   server:
     port: 9193

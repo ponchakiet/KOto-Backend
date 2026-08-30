@@ -23,7 +23,7 @@ spring:
 grpc:
   client:
     uploadServiceGrpc:
-      address: "discovery:///upload-service"
+      address: "static://localhost:9192"
       negotiationType: PLAINTEXT
   server:
     port: 9191
