@@ -22,7 +22,7 @@ public class VehicleGrpcServiceImpl extends VehicleToPostServiceGrpc.VehicleToPo
     @Override
     public void getPoster(VehicleRequest request, StreamObserver<Content> responseObserver) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(request.getId());
-        if (optionalVehicle.isPresent())
+        if (!optionalVehicle.isPresent())
             responseObserver.onError(
                     Status.NOT_FOUND
                             .withDescription("Vehicle not found with ID: " + request.getId())

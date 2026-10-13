@@ -8,6 +8,7 @@ from request.QueryRequest import QueryRequest
 from response.QueryResponse import QueryResponse
 from service.embeeding_service import markdown_chunking, markdown_chunking_file
 from service.rag_qa import ask_question
+from service.post_service import run
 
 app = FastAPI(root_path="/rag-service")
 
@@ -20,6 +21,7 @@ async def register_with_eureka():
         instance_port=8000,
         instance_host="127.0.0.1",
     )
+    await run()
 
 
 @app.post("/api/v1/chat", response_model=QueryResponse)
@@ -34,13 +36,24 @@ async def chat_endpoint(request: QueryRequest):
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+
+        print("========== CHAT ERROR ==========")
+        print(f"Error: {e}")
+        traceback.print_exc()
+        print("================================")
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 
 @app.get("/api/v1/test")
 async def root():
     print("ok")
     return {"message": "Hello World"}
+
 
 @app.post("/api/v1/feed")
 async def feed(file: UploadFile = File(...)):
@@ -50,6 +63,7 @@ async def feed(file: UploadFile = File(...)):
         "code": HTTPStatus.OK
     }
 
+
 @app.post("/api/v1/test")
 async def feed(file: UploadFile = File(...)):
     docs = await markdown_chunking_file(file)
@@ -57,6 +71,7 @@ async def feed(file: UploadFile = File(...)):
         "doc": docs,
         "code": HTTPStatus.OK
     }
+
 
 # @app.post("/api/v1/chunking")
 # async def ok(file: UploadFile = File(...)):

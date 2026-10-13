@@ -16,6 +16,7 @@ import poncha.kiet.vehicleservice.entity.VehicleType;
 import poncha.kiet.vehicleservice.service.VehicleService;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +124,20 @@ public class VehicleController {
                         .vehicleId(id)
                         .file(file)
                         .build()))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Response<?>> countVehicles(@RequestHeader("X-Roles") List<String> roles,
+                                                     @RequestParam LocalDate fromDate,
+                                                     @RequestParam LocalDate toDate
+
+    ) {
+        return ResponseEntity.ok(Response.builder()
+                .success(true)
+                .message("Count vehicles successfully")
+                .data(vehicleService.countVehicle(roles, fromDate, toDate))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

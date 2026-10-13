@@ -13,6 +13,7 @@ import poncha.kiet.postservice.projection.PostHistory;
 import poncha.kiet.postservice.projection.PostOverview;
 import poncha.kiet.postservice.projection.StatusCount;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -51,4 +52,13 @@ public interface PostRepository extends JpaRepository<Post, String> {
             GROUP BY s.status
             """, nativeQuery = true)
     List<StatusCount> countStatusPost(@Param("userId") String userId);
+
+    @Query(value = """
+            SELECT COUNT(p)
+            FROM Post p
+            WHERE p.status = poncha.kiet.postservice.entity.PostStatus.SHOW
+                AND p.createdAt >= :start
+                AND p.createdAt < :end
+            """)
+    int countPostShow(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

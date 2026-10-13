@@ -8,11 +8,13 @@ service PostToSearchService {
 message Empty {
 
 }
-message PostDetailResponseList {
-  repeated PostDetailResponse response = 1;
-}
+
 message PostDetailRequest {
   string id = 1;
+}
+
+message PostDetailResponseList {
+  repeated PostDetailResponse response = 1;
 }
 message PostDetailResponse {
   string id = 1;
@@ -23,7 +25,7 @@ message PostDetailResponse {
   string lastUpdated = 6;
   string createdAt = 7;
   string status = 8;
-  AssetResponse assetDetail = 9;
+  VehicleResponse vehicleDetail = 9;
   UserInfoResponse userInfo = 10;
 }
 
@@ -34,25 +36,24 @@ message UserInfoResponse {
   string avt = 4;
 }
 
-message AssetResponse {
+message VehicleResponse {
   string id = 1;
-  string province = 4;
-  string ward = 5;
-  string address = 6;
-  repeated int32 dimension = 7 ;
-  map<string, string> properties = 8;
-  repeated Content contentList = 9;
-  double landArea = 10;
-  double usableArea = 11;
-  repeated string otherInfo = 12;
-  map<string, string> locationAsset = 13;
-  CategoryResponse category = 14;
-
+  string province = 2;
+  string ward = 3;
+  string address = 4;
+  double price = 5;
+  int32 manufactureYear = 6;
+  map<string, string> properties = 7;
+  repeated Content contentList = 8;
+  repeated string otherInfo = 9;
+  CategoryResponse category = 10;
 }
+
 message CategoryResponse {
   string id = 1;
   string name = 2;
 }
+
 message Content {
   string id = 1;
   string url = 2;

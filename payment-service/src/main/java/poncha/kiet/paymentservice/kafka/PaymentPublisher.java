@@ -11,11 +11,25 @@ import poncha.kiet.paymentservice.event.PaymentEvent;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentPublisher {
-    private KafkaTemplate<String, PaymentEvent> kafkaTemplate;
+    private final KafkaTemplate<String, PaymentEvent> kafkaTemplate;
     private final String TOPIC = "koto-payment-topic";
 
     public void publishMessage(PaymentEvent paymentEvent) {
-        kafkaTemplate.send(TOPIC, String.valueOf(paymentEvent.getPaymentRequestDto().getPurposeId()), paymentEvent);
-        System.out.println("Payment event published: " + paymentEvent);
+        log.info("🔥 ĐANG PUBLISH PAYMENT EVENT: {}", paymentEvent);
+
+        kafkaTemplate.send(
+                TOPIC,
+                String.valueOf(paymentEvent.getPaymentRequestDto().getPurposeId()),
+                paymentEvent
+        ).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("❌ Kafka publish FAILED", ex);
+            } else {
+                log.info("✅ Kafka publish SUCCESS: topic={}, offset={}",
+                        result.getRecordMetadata().topic(),
+                        result.getRecordMetadata().offset());
+            }
+        });
+
     }
 }

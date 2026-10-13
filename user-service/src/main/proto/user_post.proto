@@ -16,9 +16,9 @@ message UserPostInfoResponse {
   string id = 1;
   string firstName = 2;
   string lastName = 3;
-  string avtUrl = 4;
+  optional string avtUrl = 4;
   string email = 5;
-  string phoneNumber = 8;
+  optional string phoneNumber = 8;
   google.protobuf.Timestamp createdAt = 6;
   google.protobuf.Timestamp lastAccess = 7;
 }

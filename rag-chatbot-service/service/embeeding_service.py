@@ -85,7 +85,7 @@ async def markdown_chunking(file):
                 }
             })
 
-    await index_to_pinecone(docs)
+    index_to_pinecone(docs)
 
 
 def semantic_chunking(text, chunk_size=500, chunk_overlap=50, similarity_threshold=0.85):
@@ -165,7 +165,7 @@ async def feed_db(data):
             }
         })
 
-    await index_to_pinecone(docs)
+    index_to_pinecone(docs)
 
 
 if __name__ == "__main__":

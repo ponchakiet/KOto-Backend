@@ -8,6 +8,7 @@ import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.entity.PostStatus;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -51,4 +52,6 @@ public interface PostService {
     Page<CommentResponseDTO> findCommentsByPostId(String postId, Pageable pageable);
 
     List<StatusCountResponseDTO> countStatusPost(String userId);
+
+    Map<String, Integer> countPostShow(List<String> roles, LocalDate fromDate, LocalDate toDate);
 }

@@ -27,7 +27,7 @@ public class Vehicle {
     private String address;
     private double price;
     private int manufactureYear;
-    private Map<String, String> properties;
+        private Map<String, String> properties;
     private String[] otherInfo;
     private String projectId;
     private String userId;

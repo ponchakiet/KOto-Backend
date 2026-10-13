@@ -50,38 +50,6 @@ public class KeycloakService {
         return (String) response.getBody().get("access_token");
     }
 
-    public void createUser(UserSignUpRequestDTO request) {
-        String url = keycloakUrl + "/admin/realms/" + realm + "/users";
-
-        Map<String, Object> user = new HashMap<>();
-        user.put("username", request.getUsername());
-        user.put("email", request.getEmail());
-        user.put("enabled", true);
-
-        Map<String, Object> credential = new HashMap<>();
-        credential.put("type", "password");
-        credential.put("value", request.getPassword());
-        credential.put("temporary", false);
-
-        user.put("credentials", List.of(credential));
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(getAdminToken());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<Map<String, Object>> requestHttpEntity = new HttpEntity<>(user, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, requestHttpEntity, String.class);
-
-        String location = response.getHeaders().getFirst("Location");
-        String userId = location != null ? location.substring(location.lastIndexOf("/") + 1) : null;
-
-        request.setUserId(userId);
-
-        if (userId != null) {
-            assignRoleToUser(userId, UserRole.ROLE_USER.name());
-        }
-    }
-
     private void assignRoleToUser(String userId, String roleName) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getAdminToken());
@@ -109,5 +77,39 @@ public class KeycloakService {
                 new HttpEntity<>(List.of(role), headers),
                 String.class
         );
+    }
+
+    public void createUser(UserSignUpRequestDTO request) {
+        String url = keycloakUrl + "/admin/realms/" + realm + "/users";
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", request.getUsername());
+        user.put("email", request.getEmail());
+        user.put("firstName", request.getFirstName());
+        user.put("lastName", request.getLastName());
+        user.put("enabled", true);
+
+        Map<String, Object> credential = new HashMap<>();
+        credential.put("type", "password");
+        credential.put("value", request.getPassword());
+        credential.put("temporary", false);
+
+        user.put("credentials", List.of(credential));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(getAdminToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> requestHttpEntity = new HttpEntity<>(user, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestHttpEntity, String.class);
+
+        String location = response.getHeaders().getFirst("Location");
+        String userId = location != null ? location.substring(location.lastIndexOf("/") + 1) : null;
+
+        request.setUserId(userId);
+
+        if (userId != null) {
+            assignRoleToUser(userId, UserRole.ROLE_USER.name());
+        }
     }
 }

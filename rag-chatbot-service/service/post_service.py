@@ -19,6 +19,10 @@ async def run():
 
     response_dict = MessageToDict(response, preserving_proto_field_name=True)
 
+    posts = response_dict.get("response", [])
+
+    print("Posts received:", len(posts))
+
     await feed_db(response_dict)
 
 

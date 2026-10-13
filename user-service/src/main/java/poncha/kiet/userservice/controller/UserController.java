@@ -2,7 +2,6 @@ package poncha.kiet.userservice.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +14,9 @@ import poncha.kiet.userservice.dto.response.*;
 import poncha.kiet.userservice.service.UserService;
 import poncha.kiet.userservice.service.impl.KeycloakService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -59,7 +60,7 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/user")
     public ResponseEntity<Response<UserResponseDTO>> getUserById(@RequestHeader("X-UserId") String userId) {
         return ResponseEntity.ok(Response.<UserResponseDTO>builder()
                 .success(true)
@@ -81,7 +82,7 @@ public class UserController {
                 .build());
     }
 
-    @PutMapping("/users/{userId}")
+    @PutMapping("/users")
     public ResponseEntity<Response<UserResponseDTO>> updateProfile(
             @RequestHeader("X-UserId") String userId,
             @RequestBody UserUpdateDTO request
@@ -184,15 +185,30 @@ public class UserController {
     }
 
     @DeleteMapping("/users/unfollow/{followerId}")
-    public ResponseEntity<Response<Void>> unfollowUser(
+    public ResponseEntity<Response<Map<String, String>>> unfollowUser(
             @RequestHeader("X-UserId") String id,
             @PathVariable("followerId") String followerId
     ) {
-        userService.unfollowUser(id, followerId);
-        return ResponseEntity.ok(Response.<Void>builder()
+        return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
                 .message("Unfollow user successfully")
+                .data(userService.unfollowUser(id, followerId))
                 .timestamp(LocalDateTime.now())
                 .build());
     }
+
+    @GetMapping("/users/count")
+    public ResponseEntity<Response<?>> userCount(
+            @RequestHeader("X-Roles") List<String> roles,
+            @RequestParam LocalDate fromDate,
+            @RequestParam LocalDate toDate
+    ) {
+        return ResponseEntity.ok(Response.builder()
+                .success(true)
+                .message("Get user count successfully")
+                .data(userService.countUsers(roles, fromDate, toDate))
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
 }

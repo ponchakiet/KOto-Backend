@@ -3,9 +3,9 @@
 import grpc
 import warnings
 
-import post_pb2 as post__pb2
+from generated import post_pb2 as post__pb2
 
-GRPC_GENERATED_VERSION = '1.83.0'
+GRPC_GENERATED_VERSION = '1.74.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in post_pb2_grpc.py depends on'
+        + f' but the generated code in post_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class PostToSearchServiceStub:
+class PostToSearchServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -46,7 +46,7 @@ class PostToSearchServiceStub:
                 _registered_method=True)
 
 
-class PostToSearchServiceServicer:
+class PostToSearchServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def getAllPost(self, request, context):
@@ -82,7 +82,7 @@ def add_PostToSearchServiceServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class PostToSearchService:
+class PostToSearchService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod

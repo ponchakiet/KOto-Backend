@@ -11,6 +11,8 @@ import poncha.kiet.userservice.dto.response.UserLandingPageResponseDTO;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
 import poncha.kiet.userservice.dto.response.UserResponseDTO;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 public interface UserService {
@@ -41,4 +43,6 @@ public interface UserService {
     Map<String, String> followUser(String userId, String followerId);
 
     Map<String, String> unfollowUser(String userId, String followerId);
+
+    Map<String, Long> countUsers(List<String> roles, LocalDate fromDate, LocalDate toDate);
 }

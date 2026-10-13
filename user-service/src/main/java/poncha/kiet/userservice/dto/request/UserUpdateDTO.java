@@ -10,14 +10,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserUpdateDTO {
-    private String username;
-    private String password;
     private String email;
     private String description;
     private String firstName;
     private String lastName;
     private LocalDate dob;
-    private boolean sex;
+    private Boolean sex;
     private String phoneNumber;
     private String taxCode;
     private String cid;

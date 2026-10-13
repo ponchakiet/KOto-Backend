@@ -28,6 +28,7 @@ import poncha.kiet.postservice.utils.AppConstant;
 import poncha.kiet.postservice.utils.Helper;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +238,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostOverviewResponseDTO> findAllByStatus(String status, String kw, String userId, Pageable pageable) {
+        if (kw == null) kw = "";
         Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, userId, kw, PostStatus.valueOf(status));
 
         Page<PostOverviewResponseDTO> data = postOverviews
@@ -258,6 +260,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostWebmasterOverviewResponseDTO> findAllByStatus(String status, String kw, Pageable pageable) {
         PostStatus postStatus = status != null ? PostStatus.valueOf(status) : null;
+        if (kw == null) kw = "";
         Page<PostOverview> postOverviews = postRepository.findAllByStatus(pageable, null, kw, postStatus);
         Page<PostWebmasterOverviewResponseDTO> data = postOverviews
                 .map(p -> {
@@ -286,12 +289,10 @@ public class PostServiceImpl implements PostService {
                 .userId(userId)
                 .createdAt(LocalDateTime.now())
                 .content(content.get("content"))
+                .post(post)
                 .build();
 
-        post.addComment(comment);
-        postRepository.save(post);
-
-        comment = commentRepository.save(comment);
+        commentRepository.save(comment);
 
         return Map.of("id", comment.getId(),
                 "content", comment.getContent(),
@@ -356,5 +357,20 @@ public class PostServiceImpl implements PostService {
                         .name(c.getStatus())
                         .build())
                 .toList();
+    }
+
+    @Override
+    public Map<String, Integer> countPostShow(List<String> roles, LocalDate fromDate, LocalDate toDate) {
+        if (!roles.contains(UserRole.ROLE_WEBMASTER.name()))
+            throw new UnauthorizedException("Don't have permission for this resource");
+
+        LocalDateTime start = fromDate.atStartOfDay();
+        LocalDateTime end = toDate
+                .plusDays(1)
+                .atStartOfDay();
+
+        int post = postRepository.countPostShow(start, end);
+
+        return Map.of("totalPosts", post);
     }
 }

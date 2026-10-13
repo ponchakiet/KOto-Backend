@@ -12,6 +12,7 @@ import poncha.kiet.postservice.dto.response.*;
 import poncha.kiet.postservice.service.PostService;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -240,7 +241,7 @@ public class PostController {
             @RequestBody Map<String, String> params) {
         return ResponseEntity.ok(Response.<Map<String, String>>builder()
                 .success(true)
-                .message("Get comments successfully")
+                .message("Create comments successfully")
                 .data(postService.createComment(postId, userId, params))
                 .timestamp(LocalDateTime.now())
                 .build());
@@ -253,7 +254,22 @@ public class PostController {
         postService.deleteComment(postId, params);
         return ResponseEntity.ok(Response.<Void>builder()
                 .success(true)
-                .message("Get comments successfully")
+                .message("Delete comments successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/posts/count")
+    public ResponseEntity<Response<?>> getPostCount(
+            @RequestHeader("X-Roles") List<String> roles,
+            @RequestParam LocalDate fromDate,
+            @RequestParam LocalDate toDate
+
+    ) {
+        return ResponseEntity.ok(Response.builder()
+                .success(true)
+                .message("Get post count successfully")
+                .data(postService.countPostShow(roles, fromDate, toDate))
                 .timestamp(LocalDateTime.now())
                 .build());
     }

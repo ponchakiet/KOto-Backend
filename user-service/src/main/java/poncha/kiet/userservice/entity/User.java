@@ -52,9 +52,6 @@ public class User {
     private String taxCode;
     @Column(name = "cid")
     private String cid;
-    @ManyToOne
-    @JoinColumn(name = "subscription_plan_id")
-    private SubscriptionPlan subscriptionPlan;
 
     @ManyToMany
     @JoinTable(

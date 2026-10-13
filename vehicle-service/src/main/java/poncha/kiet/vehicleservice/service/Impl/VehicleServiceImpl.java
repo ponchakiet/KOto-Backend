@@ -18,6 +18,7 @@ import poncha.kiet.vehicleservice.entity.Content;
 import poncha.kiet.vehicleservice.exception.ResourceNotFoundException;
 import poncha.kiet.vehicleservice.dto.request.VehicleRequestDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
+import poncha.kiet.vehicleservice.exception.UnauthorizedException;
 import poncha.kiet.vehicleservice.grpc.*;
 import poncha.kiet.vehicleservice.mapper.VehicleMapper;
 import poncha.kiet.vehicleservice.projection.VehicleSummary;
@@ -29,6 +30,7 @@ import poncha.kiet.vehicleservice.service.VehicleService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -239,5 +241,22 @@ public class VehicleServiceImpl implements VehicleService {
 
         vehicleMapper.update(request, vehicle);
         vehicleRepository.save(vehicle);
+    }
+
+    @Override
+    public Map<String, Long> countVehicle(List<String> roles, LocalDate fromDate, LocalDate toDate) {
+        if (!roles.contains(UserRole.ROLE_WEBMASTER.name()))
+            throw new UnauthorizedException("Don't have permission for this resource");
+
+
+        LocalDateTime start = fromDate.atStartOfDay();
+
+        LocalDateTime end = toDate
+                .plusDays(1)
+                .atStartOfDay();
+
+        long vehicle = vehicleRepository.countVehiclePERSIST(start, end);
+
+        return Map.of("totalVehicles", vehicle);
     }
 }

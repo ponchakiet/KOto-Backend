@@ -1,0 +1,19 @@
+{
+  "name": "koto-post-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "host.docker.internal",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "Ngocmai@1004",
+    "database.dbname": "koto_postdb",
+    "topic.prefix": "koto",
+    "plugin.name": "pgoutput",
+    "slot.name": "koto_post_slot",
+    "publication.name": "koto_post_publication",
+    "table.include.list": "public.posts",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

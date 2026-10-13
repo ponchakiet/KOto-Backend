@@ -14,7 +14,7 @@ import poncha.kiet.searchservice.entity.enums.PostType;
 
 import java.time.LocalDateTime;
 
-@Document(indexName = "post_index")
+@Document(indexName = "post-index")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

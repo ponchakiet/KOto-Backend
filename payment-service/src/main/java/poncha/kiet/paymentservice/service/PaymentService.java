@@ -8,10 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import poncha.kiet.paymentservice.dto.request.PaymentRequestDTO;
 import poncha.kiet.paymentservice.dto.response.InitPaymentResponse;
 import poncha.kiet.paymentservice.dto.response.IpnResponse;
-import poncha.kiet.paymentservice.entity.Payment;
-import poncha.kiet.paymentservice.entity.PaymentStatus;
-import poncha.kiet.paymentservice.entity.PurposeType;
-import poncha.kiet.paymentservice.entity.TransactionType;
+import poncha.kiet.paymentservice.entity.*;
 import poncha.kiet.paymentservice.event.PaymentEvent;
 import poncha.kiet.paymentservice.grpc.PaymentServiceGrpc;
 import poncha.kiet.paymentservice.grpc.PaymentUrlRequest;
@@ -20,6 +17,7 @@ import poncha.kiet.paymentservice.kafka.PaymentPublisher;
 import poncha.kiet.paymentservice.repository.PaymentRepository;
 import poncha.kiet.paymentservice.utils.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -53,8 +51,7 @@ public class PaymentService extends PaymentServiceGrpc.PaymentServiceImplBase {
         var expiredDate = DateUtils.formatVnTime(vnCalendar);    // 4. expiredDate for secure
 
         var ipAddress = request.getIpAddress();
-        var orderInfo = VNPayUtils.buildPaymentDetail(txnRef, PurposeType.valueOf(request.getPurposeType())
-                , TransactionType.valueOf(request.getTransactionType()));
+        var orderInfo = VNPayUtils.buildPaymentDetail(txnRef, PurposeType.valueOf(request.getPurposeType()), TransactionType.valueOf(request.getTransactionType()));
 
         Map<String, String> params = new HashMap<>();
 
@@ -80,9 +77,7 @@ public class PaymentService extends PaymentServiceGrpc.PaymentServiceImplBase {
 
         var initPaymentUrl = VNPayUtils.buildInitPaymentUrl(params);
 
-        PaymentUrlResponse response = PaymentUrlResponse.newBuilder()
-                .setVnpUrl(initPaymentUrl)
-                .build();
+        PaymentUrlResponse response = PaymentUrlResponse.newBuilder().setVnpUrl(initPaymentUrl).build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -104,59 +99,35 @@ public class PaymentService extends PaymentServiceGrpc.PaymentServiceImplBase {
         LocalDateTime dateTime = LocalDateTime.parse(params.get(VNPayParams.PAY_DATE), formatter);
 
         if (vnpResponseCode.equals("00")) {
-            Payment payment = Payment.builder()
-                    .amount(amount)
-                    .status(PaymentStatus.SUCCESS)
-                    .purposeId(otherInfo[0])
-                    .purposeType(PurposeType.valueOf(otherInfo[1]))
-                    .transactionType(TransactionType.valueOf(otherInfo[2]))
-                    .createdAt(dateTime)
-                    .transactionRef(transactionRef)
-                    .build();
+            Payment payment = Payment.builder().amount(amount).status(PaymentStatus.SUCCESS).purposeId(otherInfo[0]).purposeType(PurposeType.valueOf(otherInfo[1])).transactionType(TransactionType.valueOf(otherInfo[2])).createdAt(dateTime).transactionRef(transactionRef).build();
             paymentRepository.save(payment);
 
-            PaymentRequestDTO paymentRequest = PaymentRequestDTO.builder()
-                    .amount(amount)
-                    .purposeId(otherInfo[0])
-                    .purposeType(otherInfo[1])
-                    .build();
+            PaymentRequestDTO paymentRequest = PaymentRequestDTO.builder().amount(amount).purposeId(otherInfo[0]).purposeType(otherInfo[1]).build();
 
-            PaymentEvent paymentEvent = PaymentEvent.builder()
-                    .eventId(UUID.randomUUID())
-                    .paymentStatus(PaymentStatus.SUCCESS)
-                    .eventDate(new Date())
-                    .paymentRequestDto(paymentRequest)
-                    .build();
+            PaymentEvent paymentEvent = PaymentEvent.builder().eventId(UUID.randomUUID()).paymentStatus(PaymentStatus.SUCCESS).eventDate(new Date()).paymentRequestDto(paymentRequest).build();
 
             paymentPublisher.publishMessage(paymentEvent);
             return VnIpnResponseUtils.SUCCESS;
         }
-        Payment payment = Payment.builder()
-                .amount(amount)
-                .status(PaymentStatus.FAILED)
-                .purposeId(otherInfo[0])
-                .purposeType(PurposeType.valueOf(otherInfo[1]))
-                .transactionType(TransactionType.valueOf(otherInfo[2]))
-                .createdAt(dateTime)
-                .transactionRef(transactionRef)
-                .build();
+        Payment payment = Payment.builder().amount(amount).status(PaymentStatus.FAILED).purposeId(otherInfo[0]).purposeType(PurposeType.valueOf(otherInfo[1])).transactionType(TransactionType.valueOf(otherInfo[2])).createdAt(dateTime).transactionRef(transactionRef).build();
 
-        PaymentRequestDTO paymentRequest = PaymentRequestDTO.builder()
-                .amount(amount)
-                .purposeId(otherInfo[0])
-                .purposeType(otherInfo[1])
-                .build();
+        PaymentRequestDTO paymentRequest = PaymentRequestDTO.builder().amount(amount).purposeId(otherInfo[0]).purposeType(otherInfo[1]).build();
 
-        PaymentEvent paymentEvent = PaymentEvent.builder()
-                .eventId(UUID.randomUUID())
-                .paymentStatus(PaymentStatus.FAILED)
-                .eventDate(new Date())
-                .paymentRequestDto(paymentRequest)
-                .build();
+        PaymentEvent paymentEvent = PaymentEvent.builder().eventId(UUID.randomUUID()).paymentStatus(PaymentStatus.FAILED).eventDate(new Date()).paymentRequestDto(paymentRequest).build();
 
         paymentPublisher.publishMessage(paymentEvent);
         paymentRepository.save(payment);
 
         return VnIpnResponseUtils.UNKNOWN_ERROR;
+    }
+
+    public Map<String, Double> sum(List<String> roles, LocalDate fromDate, LocalDate toDate) throws Exception {
+        if (!roles.contains(UserRole.ROLE_WEBMASTER.name())) throw new Exception("Don't have permission");
+        LocalDateTime start = fromDate.atStartOfDay();
+        LocalDateTime end = toDate.plusDays(1).atStartOfDay();
+
+        Double s = paymentRepository.sumSuccessfulTransactions(start, end);
+
+        return Map.of("totalAmount", s != null ? s : 0.0);
     }
 }

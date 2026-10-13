@@ -17,40 +17,57 @@ public class SearchConsumer {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(
-            topics = "koto.koto_postdb.post",
+            topics = "koto.public.posts",
             groupId = "koto-async"
     )
-    public void syncCourse(ConsumerRecord<?, ?> consumerRecord) {
+    public void syncPost(ConsumerRecord<?, ?> consumerRecord) {
+
         try {
             JsonNode root = objectMapper.readTree((String) consumerRecord.value());
-            JsonNode payload = root.path("payload");
 
-            if (payload.isMissingNode()) {
-                log.warn("No payload found in message: {}", consumerRecord.value());
-                return;
-            }
+            String op = root.path("op").asText();
 
-            String op = payload.path("op").asText();
-            String postId = null;
+            String postId;
 
             switch (op) {
-                case "c": // CREATE
-                    postId = payload.path("after").path("id").asText();
+
+                case "c":
+                case "r":
+                    postId = root.path("after").path("id").asText();
+
+                    log.info("Create post from Debezium - {}", postId);
+
                     asyncService.createPost(postId);
                     break;
-                case "u": // UPDATE
-                    postId = payload.path("after").path("id").asText();
+
+                case "u":
+                    postId = root.path("after").path("id").asText();
+
+                    log.info("Update post from Debezium - {}", postId);
+
                     asyncService.updatePost(postId);
                     break;
-                case "d": // DELETE
-                    postId = payload.path("before").path("id").asText();
+
+                case "d":
+                    postId = root.path("before").path("id").asText();
+
+                    log.info("Delete post from Debezium - {}", postId);
+
                     asyncService.deletePost(postId);
                     break;
+
                 default:
-                    log.warn("Unsupported op: {}", op);
+                    log.warn("Unsupported Debezium operation: {}", op);
             }
+
         } catch (Exception e) {
-            log.error("Failed to process message: {}", consumerRecord.value(), e);
+            log.error(
+                    "Failed to process Kafka message: {}",
+                    consumerRecord.value(),
+                    e
+            );
+
+            throw new RuntimeException("Failed to process Kafka message", e);
         }
     }
 }

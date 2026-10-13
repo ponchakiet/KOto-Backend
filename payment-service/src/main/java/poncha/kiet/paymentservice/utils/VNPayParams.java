@@ -12,6 +12,7 @@ public class VNPayParams {
     public static final String TMN_CODE = "vnp_TmnCode";
     public static final String CURRENCY = "vnp_CurrCode";
     public static final String RETURN_URL = "vnp_ReturnUrl";
+    public static final String IPN_URL = "vnp_IpnUrl";
     public static final String CREATED_DATE = "vnp_CreateDate";
     public static final String EXPIRE_DATE = "vnp_ExpireDate";
     public static final String IP_ADDRESS = "vnp_IpAddr";

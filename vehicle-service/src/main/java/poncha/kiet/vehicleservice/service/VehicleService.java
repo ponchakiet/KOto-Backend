@@ -8,6 +8,7 @@ import poncha.kiet.vehicleservice.dto.response.VehicleResponseDTO;
 import poncha.kiet.vehicleservice.dto.response.VehicleSummaryResponseDTO;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -27,4 +28,6 @@ public interface VehicleService {
     Map<String, String> uploadMedia(String userId, UploadImageRequestDTO request);
 
     void updateVehicle(VehicleRequestDTO request, String userId) throws AccessDeniedException;
+
+    Map<String, Long> countVehicle(List<String> roles, LocalDate fromDate, LocalDate toDate);
 }

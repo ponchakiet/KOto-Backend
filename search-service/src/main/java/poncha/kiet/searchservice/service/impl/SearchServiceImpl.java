@@ -239,8 +239,6 @@ public class SearchServiceImpl implements SearchService {
         String province = isValidSearchField(params, FilterUtils.PROVINCE) ? params.get(FilterUtils.PROVINCE) : null;
         String ward = isValidSearchField(params, FilterUtils.WARD) ? params.get(FilterUtils.WARD) : null;
         String type = isValidSearchField(params, FilterUtils.TYPE) ? params.get(FilterUtils.TYPE) : PostType.SELL.name();
-        Integer minYear = isValidSearchField(params, FilterUtils.MIN_YEAR) ? Integer.parseInt(params.get(FilterUtils.MIN_YEAR)) : null;
-        Integer maxYear = isValidSearchField(params, FilterUtils.MAX_YEAR) ? Integer.parseInt(params.get(FilterUtils.MAX_YEAR)) : null;
         Double minPrice = isValidSearchField(params, FilterUtils.MIN_PRICE) ? Double.parseDouble(params.get(FilterUtils.MIN_PRICE)) : null;
         Double maxPrice = isValidSearchField(params, FilterUtils.MAX_PRICE) ? Double.parseDouble(params.get(FilterUtils.MAX_PRICE)) : null;
 
@@ -295,7 +293,6 @@ public class SearchServiceImpl implements SearchService {
             extractedTermsFilter(ward, "vehicleDetail.ward", b);
             extractedTermsFilter(type, "type", b);
             extractedRange(minPrice, maxPrice, "price", b);
-            extractedRange(minYear, maxYear, "manufactureYear", b);
 
             if (restParams != null) {
                 for (var x : restParams.entrySet()) {

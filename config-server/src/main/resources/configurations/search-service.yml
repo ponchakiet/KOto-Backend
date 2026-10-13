@@ -16,7 +16,10 @@ spring:
     index-recovery:
       mode: full
   kafka:
+    bootstrap-servers: 127.0.0.1:19091
     consumer:
+      group-id: koto-async
+      auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 

@@ -17,8 +17,10 @@ import poncha.kiet.userservice.dto.response.UserLandingPageResponseDTO;
 import poncha.kiet.userservice.dto.response.UserProfileResponseDTO;
 import poncha.kiet.userservice.dto.response.UserResponseDTO;
 import poncha.kiet.userservice.entity.User;
+import poncha.kiet.userservice.entity.UserRole;
 import poncha.kiet.userservice.exception.DuplicateResourceException;
 import poncha.kiet.userservice.exception.ResourceNotFoundException;
+import poncha.kiet.userservice.exception.UnauthorizedException;
 import poncha.kiet.userservice.grpc.FileChunk;
 import poncha.kiet.userservice.grpc.UploadResponse;
 import poncha.kiet.userservice.grpc.UploadServiceGrpc;
@@ -31,8 +33,10 @@ import poncha.kiet.userservice.utils.TypeMedia;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -132,12 +136,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found user with id: " + id));
 
-        if (request.getUsername() != null && userRepository.findByUsername(request.getUsername())
-                && !user.getUsername().equals(request.getUsername())) {
-            throw new DuplicateResourceException("Username is already taken");
-        }
-
-        if (request.getEmail() != null && userRepository.findByEmail(request.getEmail())
+        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())
                 && !user.getEmail().equals(request.getEmail())) {
             throw new DuplicateResourceException("Email is already in use");
         }
@@ -280,5 +279,18 @@ public class UserServiceImpl implements UserService {
         return Map.of("followerId", followerId);
     }
 
+    @Override
+    public Map<String, Long> countUsers(List<String> roles, LocalDate fromDate, LocalDate toDate) {
+        if (!roles.contains(UserRole.ROLE_WEBMASTER.name()))
+            throw new UnauthorizedException("Don't have permission for this resource");
 
+        LocalDateTime start = fromDate.atStartOfDay();
+        LocalDateTime end = toDate
+                .plusDays(1)
+                .atStartOfDay();
+
+        long count = userRepository.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(start, end);
+
+        return Map.of("totalUsers", count);
+    }
 }

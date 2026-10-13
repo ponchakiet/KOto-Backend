@@ -31,8 +31,35 @@ public interface UserMapper {
 
     void updateUserFromRequest(UserUpdateDTO userUpdateDTO, @MappingTarget User user);
 
-    @Mapping(source = "createdAt", target = "createdAt")
-    UserPostInfoResponse toGrpcResponse(UserPostInfo user);
+    default UserPostInfoResponse toGrpcResponse(UserPostInfo user) {
+        UserPostInfoResponse.Builder builder = UserPostInfoResponse.newBuilder();
+
+        if (user.getId() != null)
+            builder.setId(user.getId());
+
+        if (user.getFirstName() != null)
+            builder.setFirstName(user.getFirstName());
+
+        if (user.getLastName() != null)
+            builder.setLastName(user.getLastName());
+
+        if (user.getAvtUrl() != null)
+            builder.setAvtUrl(user.getAvtUrl());
+
+        if (user.getEmail() != null)
+            builder.setEmail(user.getEmail());
+
+        if (user.getPhoneNumber() != null)
+            builder.setPhoneNumber(user.getPhoneNumber());
+
+        if (user.getCreatedAt() != null)
+            builder.setCreatedAt(map(user.getCreatedAt()));
+
+        if (user.getLastAccess() != null)
+            builder.setLastAccess(map(user.getLastAccess()));
+
+        return builder.build();
+    }
 
     FollowerResponse toFollowerResponse(User user);
 

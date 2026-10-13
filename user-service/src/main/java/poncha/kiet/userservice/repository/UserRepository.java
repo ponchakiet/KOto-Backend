@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import poncha.kiet.userservice.entity.User;
 import poncha.kiet.userservice.projection.UserProfile;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -38,10 +39,8 @@ public interface UserRepository extends JpaRepository<User, String> {
             WHERE f.follower_id =:userId
             """, nativeQuery = true)
     Long countFollowing(@Param("userId") String userId);
-
-    boolean findByUsername(String username);
-
-    boolean findByEmail(String email);
+    
+    boolean existsByEmail(String email);
 
     @Query(value = """
             SELECT u.* FROM users u
@@ -73,4 +72,6 @@ public interface UserRepository extends JpaRepository<User, String> {
             AND f.follower_id = :followerId
             """, nativeQuery = true)
     void unfollowUser(@Param("userId") String userId, @Param("followerId") String followerId);
+
+    long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime start, LocalDateTime end);
 }
